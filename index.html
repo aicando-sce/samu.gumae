@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사무용품 구매 관리</title>
+<title>사무용품 구매관리_학습개발2팀</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -87,7 +87,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
 </head>
 <body>
 <header>
-  <div class="logo">사무용품 <span>구매관리</span></div>
+  <div class="logo"><span>사무용품 구매관리</span></div>
   <div style="display:flex;gap:8px">
     <button class="btn btn-out" id="btnMemberModal">👤 팀원 관리</button>
     <button class="btn btn-out" id="btnEx">📥 내보내기</button>
@@ -100,12 +100,12 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
     <label>연도</label><select id="yrSel"></select>
     <label>분기</label>
     <select id="qSel">
-      <option value="1">1분기 (1~3월)</option>
-      <option value="2">2분기 (4~6월)</option>
-      <option value="3">3분기 (7~9월)</option>
-      <option value="4">4분기 (10~12월)</option>
+      <option value="1">1분기</option>
+      <option value="2">2분기</option>
+      <option value="3">3분기</option>
+      <option value="4">4분기</option>
     </select>
-    <label>분기 예산 (원)</label>
+    <label>분기 예산(원)</label>
     <input type="number" id="budIn" placeholder="예: 500000" step="10000" style="width:140px">
     <span style="font-size:12px;color:var(--sub)">※ 분기 내 월 합산 차감</span>
   </div>
@@ -127,13 +127,13 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
       <span class="ptitle" id="mTitle">구매 내역</span>
       <span class="msum" id="mSum"></span>
     </div>
-    <div id="noMemberMsg" class="no-member" style="display:none">팀원을 먼저 추가해주세요.</div>
+    <div id="noMemberMsg" class="no-member" style="display:none">팀원을 추가해주세요.</div>
     <div id="purchaseSection">
       <div class="addrow">
         <select id="addMem"></select>
         <input type="text" id="addLnk" placeholder="구매 링크">
-        <input type="number" id="addAmt" placeholder="금액 (원)" step="100">
-        <input type="text" id="addMmo" placeholder="메모 (선택)">
+        <input type="number" id="addAmt" placeholder="금액(원)" step="100">
+        <input type="text" id="addMmo" placeholder="메(선택)">
         <button class="btn btn-blue" id="btnAdd">+ 추가</button>
       </div>
       <table>
@@ -159,7 +159,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
     <div class="member-list" id="memberList" style="margin-bottom:14px"></div>
     <div class="member-add">
       <input type="text" id="newName" placeholder="팀원 이름" style="flex:1">
-      <button class="btn btn-blue" id="btnAddM">확인</button>
+      <button class="btn btn-blue" id="btnAddM">+ 추가</button>
     </div>
     <div class="mbtns">
       <button class="btn btn-out" id="btnCloseModal">닫기</button>
