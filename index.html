@@ -29,7 +29,7 @@ select:focus, input:focus { border-color:var(--blue); }
 .btn-out { background:var(--white); color:var(--text); border:1px solid var(--border); }
 .btn-red { background:var(--red-lt); color:var(--red); border:1px solid #fecaca; }
 .btn-icon { width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
-.cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.cards { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
 .card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; box-shadow:var(--sh); }
 .card .lbl { font-size:12px; color:var(--sub); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
 .card .val { font-size:22px; font-weight:700; letter-spacing:-.5px; }
@@ -116,6 +116,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
     <div class="card"><div class="lbl">총 사용액</div><div class="val yellow" id="cUsd">—</div></div>
     <div class="card"><div class="lbl">잔액</div><div class="val green" id="cRem">—</div></div>
     <div class="card"><div class="lbl">구매 건수</div><div class="val" id="cCnt">—</div></div>
+    <div class="card"><div class="lbl">배송 완료 건수</div><div class="val" id="cDlv">—</div></div>
   </div>
 
   <!-- 월 탭 -->
@@ -390,6 +391,7 @@ function renderSummary() {
   re.textContent = remain.toLocaleString()+"원";
   re.className = "val "+(remain<0?"red":"green");
   document.getElementById("cCnt").textContent = ps.length+"건";
+  document.getElementById("cDlv").textContent = ps.done+"건";
 
   var mps = ps.filter(function(p) { return p.month===curMonth; });
   var mTotal = mps.reduce(function(s,p) { return s+p.amount; }, 0);
