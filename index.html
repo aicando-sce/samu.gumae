@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사무용품 구매 관리</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f7f8fa; --white:#fff; --border:#e4e7ec;
+  --text:#1a1d23; --sub:#6b7280;
+  --blue:#2563eb; --blue-lt:#eff4ff;
+  --green:#16a34a; --green-lt:#f0fdf4;
+  --red:#dc2626; --red-lt:#fef2f2;
+  --yellow:#d97706;
+  --r:10px; --sh:0 1px 4px rgba(0,0,0,.07);
+}
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); font-size:14px; min-height:100vh; }
+header { background:var(--white); border-bottom:1px solid var(--border); padding:0 32px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.logo { font-size:15px; font-weight:700; } .logo span { color:var(--blue); }
+.wrap { max-width:1100px; margin:0 auto; padding:28px 24px; }
+.topbar { display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.topbar label { font-size:13px; color:var(--sub); font-weight:500; }
+select, input[type=number], input[type=text] { border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:14px; background:var(--white); color:var(--text); outline:none; }
+select:focus, input:focus { border-color:var(--blue); }
+.btn { padding:7px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:opacity .15s; }
+.btn:hover { opacity:.85; }
+.btn-blue { background:var(--blue); color:#fff; }
+.btn-out { background:var(--white); color:var(--text); border:1px solid var(--border); }
+.btn-red { background:var(--red-lt); color:var(--red); border:1px solid #fecaca; }
+.btn-icon { width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+.cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; box-shadow:var(--sh); }
+.card .lbl { font-size:11px; color:var(--sub); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.card .val { font-size:22px; font-weight:700; letter-spacing:-.5px; }
+.val.blue{color:var(--blue)} .val.green{color:var(--green)} .val.red{color:var(--red)} .val.yellow{color:var(--yellow)}
+.tabs { display:flex; gap:4px; margin-bottom:20px; background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:6px; box-shadow:var(--sh); }
+.tab { flex:1; text-align:center; padding:8px 0; border-radius:7px; cursor:pointer; font-size:13px; font-weight:600; color:var(--sub); border:none; background:none; transition:all .15s; }
+.tab.on { background:var(--blue); color:#fff; } .tab:hover:not(.on) { background:var(--bg); color:var(--text); }
+.panel { background:var(--white); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--sh); margin-bottom:16px; overflow:hidden; }
+.ph { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--border); background:var(--bg); flex-wrap:wrap; gap:8px; }
+.ptitle { font-size:13px; font-weight:700; }
+.msum { display:inline-flex; gap:16px; font-size:12px; color:var(--sub); }
+.msum strong { color:var(--text); font-weight:700; }
+/* 팀원 관리 패널 */
+.member-panel { padding:14px 18px; }
+.member-list { display:flex; flex-wrap:wrap; gap:8px; min-height:32px; margin-bottom:12px; }
+.chip { display:inline-flex; align-items:center; gap:5px; background:var(--blue-lt); color:var(--blue); border-radius:20px; padding:5px 12px; font-size:13px; font-weight:600; }
+.chip button { background:none; border:none; cursor:pointer; color:var(--red); font-size:14px; line-height:1; padding:0; display:flex; align-items:center; }
+.chip button:hover { opacity:.7; }
+.member-add { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.member-add input { width:140px; }
+/* 구매 테이블 */
+.addrow { display:grid; grid-template-columns:1.4fr 2.5fr 1.2fr 1fr auto; gap:8px; padding:12px 18px; border-bottom:1px solid var(--border); background:#fafbfc; align-items:center; }
+.addrow select, .addrow input { border:1px solid var(--border); border-radius:7px; padding:6px 10px; font-size:13px; outline:none; width:100%; }
+.addrow select:focus, .addrow input:focus { border-color:var(--blue); }
+.addrow input#addAmt::-webkit-outer-spin-button, .addrow input#addAmt::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.addrow input#addAmt { -moz-appearance:textfield; }
+table { width:100%; border-collapse:collapse; }
+thead { background:var(--bg); }
+th { font-size:11px; font-weight:700; color:var(--sub); text-transform:uppercase; letter-spacing:.4px; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+td { padding:11px 14px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
+tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } tr.done td { opacity:.6; }
+.lk a { color:var(--blue); text-decoration:none; } .lk a:hover { text-decoration:underline; }
+.lk { display:flex; align-items:center; gap:6px; }
+.lk-open { color:var(--blue); text-decoration:none; font-size:13px; flex-shrink:0; }
+.lk-open:hover { opacity:.7; }
+.edit-input { border:none; box-shadow:none; -webkit-appearance:none; appearance:none; background:transparent; font-size:13px; padding:5px 7px; border-radius:6px; width:100%; color:var(--text); font-family:inherit; cursor:pointer; outline:none; }
+.edit-input:focus { box-shadow:0 0 0 2px var(--blue); background:var(--white); cursor:text; }
+.edit-amt { font-weight:600; text-align:left; }
+.edit-amt::-webkit-outer-spin-button, .edit-amt::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.edit-amt { -moz-appearance:textfield; }
+.chkbtn { width:28px; height:28px; border-radius:7px; border:1.5px solid var(--border); background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; margin:0 auto; transition:all .15s; }
+.chkbtn.on { background:var(--green-lt); border-color:var(--green); }
+.amtcell { font-weight:600; }
+.empty { text-align:center; padding:32px; color:var(--sub); font-size:13px; }
+.no-member { padding:12px 18px; color:var(--sub); font-size:13px; font-style:italic; }
+.mbg { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; }
+.modal { background:var(--white); border-radius:14px; padding:28px; width:440px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,.18); }
+.modal h3 { font-size:16px; font-weight:700; margin-bottom:18px; }
+.mbtns { display:flex; justify-content:flex-end; margin-top:16px; }
+@media(max-width:700px) {
+  .cards{grid-template-columns:1fr 1fr} .addrow{grid-template-columns:1fr 1fr}
+  header{padding:0 16px} .wrap{padding:16px 12px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">사무용품 <span>구매관리</span></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-out" id="btnMemberModal">👤 팀원 관리</button>
+    <button class="btn btn-out" id="btnEx">📥 내보내기</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- 연도/분기/예산 -->
+  <div class="topbar">
+    <label>연도</label><select id="yrSel"></select>
+    <label>분기</label>
+    <select id="qSel">
+      <option value="1">1분기 (1~3월)</option>
+      <option value="2">2분기 (4~6월)</option>
+      <option value="3">3분기 (7~9월)</option>
+      <option value="4">4분기 (10~12월)</option>
+    </select>
+    <label>분기 예산 (원)</label>
+    <input type="number" id="budIn" placeholder="예: 500000" step="10000" style="width:140px">
+    <span style="font-size:12px;color:var(--sub)">※ 분기 내 월 합산 차감</span>
+  </div>
+
+  <!-- 요약 카드 -->
+  <div class="cards">
+    <div class="card"><div class="lbl">분기 예산</div><div class="val blue" id="cBud">—</div></div>
+    <div class="card"><div class="lbl">총 사용액</div><div class="val yellow" id="cUsd">—</div></div>
+    <div class="card"><div class="lbl">잔액</div><div class="val green" id="cRem">—</div></div>
+    <div class="card"><div class="lbl">구매 건수</div><div class="val" id="cCnt">—</div></div>
+  </div>
+
+  <!-- 월 탭 -->
+  <div class="tabs" id="tabRow"></div>
+
+  <!-- 구매 내역 -->
+  <div class="panel">
+    <div class="ph">
+      <span class="ptitle" id="mTitle">구매 내역</span>
+      <span class="msum" id="mSum"></span>
+    </div>
+    <div id="noMemberMsg" class="no-member" style="display:none">팀원을 먼저 추가해주세요.</div>
+    <div id="purchaseSection">
+      <div class="addrow">
+        <select id="addMem"></select>
+        <input type="text" id="addLnk" placeholder="구매 링크">
+        <input type="number" id="addAmt" placeholder="금액 (원)" step="100">
+        <input type="text" id="addMmo" placeholder="메모 (선택)">
+        <button class="btn btn-blue" id="btnAdd">+ 추가</button>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:110px">팀원</th>
+          <th>구매 링크</th>
+          <th style="width:100px">금액</th>
+          <th style="width:80px">메모</th>
+          <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
+          <th style="width:50px;text-align:center">삭제</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">이번 달 구매 내역이 없습니다.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 팀원 관리 모달 -->
+<div class="mbg" id="memberModal" style="display:none">
+  <div class="modal">
+    <h3 id="modalTitle">👤 팀원 관리</h3>
+    <div class="member-list" id="memberList" style="margin-bottom:14px"></div>
+    <div class="member-add">
+      <input type="text" id="newName" placeholder="팀원 이름" style="flex:1">
+      <button class="btn btn-blue" id="btnAddM">확인</button>
+    </div>
+    <div class="mbtns">
+      <button class="btn btn-out" id="btnCloseModal">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  스토리지 설계
+//  팀원: opm_members_YYYY_MM  → ["홍길동", "김철수", ...]  (해당 월 활성 팀원 이름 배열)
+//  구매: opm_purchases_YYYY_QN → [{id,month,name,link,amount,memo,delivered}, ...]
+//  예산: opm_budget_YYYY_QN   → number
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var curMonth = 1;
+
+function yr() { return parseInt(document.getElementById("yrSel").value); }
+function q()  { return parseInt(document.getElementById("qSel").value); }
+function qMonths() { return [[1,2,3],[4,5,6],[7,8,9],[10,11,12]][q()-1]; }
+
+// 팀원 (월별)
+function memberKey(y, m) { return "opm_members_"+y+"_"+pad(m); }
+function pad(n) { return n < 10 ? "0"+n : ""+n; }
+
+function loadMonthMembers(y, m) {
+  try { return JSON.parse(localStorage.getItem(memberKey(y, m))) || null; } catch(e) { return null; }
+}
+function saveMonthMembers(y, m, arr) {
+  localStorage.setItem(memberKey(y, m), JSON.stringify(arr));
+}
+
+// 이전 달 계산
+function prevYM(y, m) {
+  if (m === 1) return { y: y-1, m: 12 };
+  return { y: y, m: m-1 };
+}
+
+// 해당 월 팀원 가져오기 (없으면 이전 달에서 이월)
+function getMembers(y, m) {
+  var saved = loadMonthMembers(y, m);
+  if (saved !== null) return saved;
+  // 이전 달에서 이월 (최대 13개월 전까지 탐색)
+  var cur = prevYM(y, m);
+  for (var i = 0; i < 13; i++) {
+    var prev = loadMonthMembers(cur.y, cur.m);
+    if (prev !== null) return prev.slice(); // 복사본 반환
+    cur = prevYM(cur.y, cur.m);
+  }
+  return [];
+}
+
+// 구매
+function purchaseKey() { return "opm_purchases_"+yr()+"_Q"+q(); }
+function loadPurchases() { try { return JSON.parse(localStorage.getItem(purchaseKey())) || []; } catch(e) { return []; } }
+function savePurchases(ps) { localStorage.setItem(purchaseKey(), JSON.stringify(ps)); }
+
+// 예산
+function budgetKey() { return "opm_budget_"+yr()+"_Q"+q(); }
+function loadBudget() { return parseInt(localStorage.getItem(budgetKey())) || 0; }
+function saveBudget(v) { localStorage.setItem(budgetKey(), String(v)); }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function init() {
+  var yrSel = document.getElementById("yrSel");
+  var now = new Date();
+  for (var y = now.getFullYear()-1; y <= now.getFullYear()+2; y++) {
+    var o = document.createElement("option");
+    o.value = y; o.textContent = y+"년";
+    if (y === now.getFullYear()) o.selected = true;
+    yrSel.appendChild(o);
+  }
+  document.getElementById("qSel").value = Math.ceil((now.getMonth()+1)/3);
+  var mos = qMonths();
+  curMonth = mos.indexOf(now.getMonth()+1) >= 0 ? now.getMonth()+1 : mos[0];
+
+  document.getElementById("budIn").value = loadBudget() || "";
+  renderAll();
+
+  document.getElementById("yrSel").addEventListener("change", onQChange);
+  document.getElementById("qSel").addEventListener("change", onQChange);
+  document.getElementById("budIn").addEventListener("change", function() {
+    saveBudget(parseInt(this.value)||0); renderSummary();
+  });
+  document.getElementById("btnAddM").addEventListener("click", addMember);
+  document.getElementById("newName").addEventListener("keydown", function(e) { if (e.key==="Enter") addMember(); });
+  document.getElementById("btnAdd").addEventListener("click", addPurchase);
+  document.getElementById("btnEx").addEventListener("click", doExport);
+  document.getElementById("btnMemberModal").addEventListener("click", openMemberModal);
+  document.getElementById("btnCloseModal").addEventListener("click", closeMemberModal);
+  document.getElementById("memberModal").addEventListener("click", function(e) { if (e.target===this) closeMemberModal(); });
+
+  document.getElementById("tbody").addEventListener("click", function(e) {
+    var d = e.target.closest("[data-del]");
+    var t = e.target.closest("[data-tog]");
+    if (d) doDelete(d.dataset.del);
+    if (t) doToggle(t.dataset.tog);
+  });
+  document.getElementById("tbody").addEventListener("change", function(e) {
+    var inp = e.target.closest(".edit-input");
+    if (inp) doEdit(inp.dataset.id, inp.dataset.field, inp.value);
+  });
+  document.getElementById("memberList").addEventListener("click", function(e) {
+    var b = e.target.closest("[data-rmv]");
+    if (b) removeMember(b.dataset.rmv);
+  });
+}
+
+function onQChange() {
+  var mos = qMonths();
+  curMonth = mos[0];
+  document.getElementById("budIn").value = loadBudget() || "";
+  renderAll();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  RENDER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderAll() { renderTabs(); renderDropdown(); renderTable(); renderSummary(); if (isModalOpen()) renderMembers(); }
+
+function isModalOpen() { return document.getElementById("memberModal").style.display === "flex"; }
+
+function openMemberModal() {
+  document.getElementById("modalTitle").textContent = curMonth+"월 팀원 관리";
+  renderMembers();
+  document.getElementById("memberModal").style.display = "flex";
+  document.getElementById("newName").focus();
+}
+function closeMemberModal() {
+  document.getElementById("memberModal").style.display = "none";
+}
+
+function renderTabs() {
+  var row = document.getElementById("tabRow");
+  row.innerHTML = "";
+  qMonths().forEach(function(m) {
+    var b = document.createElement("button");
+    b.className = "tab" + (m===curMonth?" on":"");
+    b.textContent = m+"월";
+    b.addEventListener("click", (function(mm){ return function() {
+      curMonth = mm; renderTabs(); renderDropdown(); renderTable(); renderSummary();
+      if (isModalOpen()) { document.getElementById("modalTitle").textContent = curMonth+"월 팀원 관리"; renderMembers(); }
+    }; })(m));
+    row.appendChild(b);
+  });
+}
+
+function renderMembers() {
+  var list = document.getElementById("memberList");
+  list.innerHTML = "";
+  var ms = getMembers(yr(), curMonth);
+  if (!ms.length) {
+    var empty = document.createElement("span");
+    empty.style.cssText = "color:var(--sub);font-size:13px;font-style:italic";
+    empty.textContent = "팀원이 없습니다.";
+    list.appendChild(empty);
+    return;
+  }
+  ms.forEach(function(name) {
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.appendChild(document.createTextNode(name));
+    var btn = document.createElement("button");
+    btn.dataset.rmv = name;
+    btn.title = "삭제";
+    btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    chip.appendChild(btn);
+    list.appendChild(chip);
+  });
+}
+
+function renderDropdown() {
+  var sel = document.getElementById("addMem");
+  var prev = sel.value;
+  sel.innerHTML = "";
+  var ms = getMembers(yr(), curMonth);
+  var noMember = document.getElementById("noMemberMsg");
+  var section = document.getElementById("purchaseSection");
+  if (!ms.length) {
+    noMember.style.display = "block";
+    section.style.display = "none";
+    return;
+  }
+  noMember.style.display = "none";
+  section.style.display = "block";
+  ms.forEach(function(name) {
+    var o = document.createElement("option");
+    o.value = name; o.textContent = name;
+    sel.appendChild(o);
+  });
+  if (ms.indexOf(prev) >= 0) sel.value = prev;
+}
+
+function renderSummary() {
+  var budget = loadBudget();
+  var ps = loadPurchases();
+  var total = ps.reduce(function(s,p) { return s+p.amount; }, 0);
+  var remain = budget - total;
+  document.getElementById("cBud").textContent = budget ? budget.toLocaleString()+"원" : "미설정";
+  document.getElementById("cUsd").textContent = total.toLocaleString()+"원";
+  var re = document.getElementById("cRem");
+  re.textContent = remain.toLocaleString()+"원";
+  re.className = "val "+(remain<0?"red":"green");
+  document.getElementById("cCnt").textContent = ps.length+"건";
+
+  var mps = ps.filter(function(p) { return p.month===curMonth; });
+  var mTotal = mps.reduce(function(s,p) { return s+p.amount; }, 0);
+  var done = mps.filter(function(p) { return p.delivered; }).length;
+  document.getElementById("mTitle").textContent = curMonth+"월 구매 내역";
+  document.getElementById("mSum").innerHTML =
+    "<span>사용 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
+    "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
+}
+
+function renderTable() {
+  var tb = document.getElementById("tbody");
+  var em = document.getElementById("empty");
+  var ps = loadPurchases().filter(function(p) { return p.month===curMonth; });
+  tb.innerHTML = "";
+  if (!ps.length) { em.style.display="block"; return; }
+  em.style.display = "none";
+  ps.forEach(function(p) {
+    var tr = document.createElement("tr");
+    if (p.delivered) tr.className = "done";
+
+    function mkTd(cls) { var t=document.createElement("td"); if(cls) t.className=cls; return t; }
+    var t1=mkTd(); t1.innerHTML="<strong>"+esc(p.memberName)+"</strong>";
+
+    var t2=mkTd("lk");
+    var linkInput = document.createElement("input");
+    linkInput.type = "text";
+    linkInput.value = p.link;
+    linkInput.className = "edit-input";
+    linkInput.dataset.field = "link";
+    linkInput.dataset.id = p.id;
+    t2.appendChild(linkInput);
+    if (p.link.startsWith("http")) {
+      var a=document.createElement("a"); a.href=p.link; a.target="_blank"; a.rel="noopener";
+      a.className = "lk-open"; a.title = "새 탭에서 열기"; a.textContent = "↗";
+      t2.appendChild(a);
+    }
+
+    var t3=mkTd("amtcell");
+    var amtInput = document.createElement("input");
+    amtInput.type = "text";
+    amtInput.value = p.amount.toLocaleString()+"원";
+    amtInput.className = "edit-input edit-amt";
+    amtInput.dataset.field = "amount";
+    amtInput.dataset.id = p.id;
+    amtInput.addEventListener("focus", function() {
+      this.value = this.dataset.raw || p.amount;
+      this.select();
+    });
+    amtInput.dataset.raw = p.amount;
+    amtInput.addEventListener("blur", function() {
+      var n = parseInt(this.value) || 0;
+      this.dataset.raw = n;
+      this.value = n.toLocaleString()+"원";
+    });
+    t3.appendChild(amtInput);
+
+    var t4=mkTd();
+    var memoInput = document.createElement("input");
+    memoInput.type = "text";
+    memoInput.value = p.memo || "";
+    memoInput.className = "edit-input";
+    memoInput.dataset.field = "memo";
+    memoInput.dataset.id = p.id;
+    t4.appendChild(memoInput);
+
+    var t5=mkTd(); t5.style.textAlign="center";
+    var cb=document.createElement("button");
+    cb.className="chkbtn"+(p.delivered?" on":"");
+    cb.title=p.delivered?"배송완료 취소":"배송완료 처리";
+    cb.textContent=p.delivered?"✅":"○";
+    cb.dataset.tog=p.id; t5.appendChild(cb);
+
+    var t6=mkTd(); t6.style.textAlign="center";
+    var db=document.createElement("button");
+    db.className="btn btn-red btn-icon"; db.title="삭제"; db.dataset.del=p.id;
+    db.innerHTML='<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    t6.appendChild(db);
+
+    tr.append(t1,t2,t3,t4,t5,t6);
+    tb.appendChild(tr);
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  팀원 액션
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function addMember() {
+  var name = document.getElementById("newName").value.trim();
+  if (!name) return;
+  var ms = getMembers(yr(), curMonth);
+  if (ms.indexOf(name) >= 0) {
+    alert('"'+name+'"은(는) 이미 이번 달 팀원입니다.'); return;
+  }
+  ms.push(name);
+  saveMonthMembers(yr(), curMonth, ms);
+  document.getElementById("newName").value = "";
+  renderMembers(); renderDropdown(); renderTable();
+}
+
+function removeMember(name) {
+  var ms = getMembers(yr(), curMonth).filter(function(n) { return n!==name; });
+  saveMonthMembers(yr(), curMonth, ms);
+  renderMembers(); renderDropdown(); renderTable();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  구매 액션
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function addPurchase() {
+  var sel = document.getElementById("addMem");
+  var name = sel.value;
+  var link = document.getElementById("addLnk").value.trim();
+  var amt  = parseInt(document.getElementById("addAmt").value)||0;
+  var memo = document.getElementById("addMmo").value.trim();
+  if (!name||!link||!amt) { alert("팀원, 구매 링크/품목, 금액을 모두 입력해주세요."); return; }
+  var ps = loadPurchases();
+  ps.push({ id:"P"+Date.now(), month:curMonth, memberName:name, link:link, amount:amt, memo:memo, delivered:false });
+  savePurchases(ps);
+  document.getElementById("addLnk").value="";
+  document.getElementById("addAmt").value="";
+  document.getElementById("addMmo").value="";
+  renderTable(); renderSummary();
+}
+
+function doDelete(id) {
+  savePurchases(loadPurchases().filter(function(p) { return p.id!==id; }));
+  renderTable(); renderSummary();
+}
+
+function doToggle(id) {
+  var ps = loadPurchases();
+  var p = ps.find(function(x) { return x.id===id; });
+  if (p) { p.delivered=!p.delivered; savePurchases(ps); }
+  renderTable(); renderSummary();
+}
+
+function doEdit(id, field, value) {
+  var ps = loadPurchases();
+  var p = ps.find(function(x) { return x.id===id; });
+  if (!p) return;
+  if (field === "amount") {
+    var n = parseInt(String(value).replace(/[^0-9]/g, "")) || 0;
+    p.amount = n;
+  } else if (field === "link") {
+    p.link = value.trim();
+  } else if (field === "memo") {
+    p.memo = value.trim();
+  }
+  savePurchases(ps);
+  renderTable(); renderSummary();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  내보내기
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function doExport() {
+  var ps = loadPurchases();
+  var csv = "월,팀원,구매 링크/품목,금액,메모,배송완료\n";
+  qMonths().forEach(function(m) {
+    ps.filter(function(p) { return p.month===m; }).forEach(function(p) {
+      csv += [m+"월",p.memberName,p.link,p.amount,p.memo||"",p.delivered?"완료":"미완료"]
+        .map(function(v) { return '"'+String(v).replace(/"/g,'""')+'"'; }).join(",")+"\n";
+    });
+  });
+  var blob = new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "사무용품구매_"+yr()+"년_"+q()+"분기.csv";
+  a.click();
+}
+
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+init();
+</script>
+</body>
+</html>
