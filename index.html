@@ -67,12 +67,12 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
 .lk-open:hover { opacity:.7; }
 .edit-input { border:none; box-shadow:none; -webkit-appearance:none; appearance:none; background:transparent; font-size:13px; padding:5px 7px; border-radius:6px; width:100%; color:var(--text); font-family:inherit; cursor:pointer; outline:none; }
 .edit-input:focus { box-shadow:0 0 0 2px var(--blue); background:var(--white); cursor:text; }
-.edit-amt { font-weight:600; text-align:left; }
+.edit-amt { text-align:left; }
 .edit-amt::-webkit-outer-spin-button, .edit-amt::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
 .edit-amt { -moz-appearance:textfield; }
 .chkbtn { width:28px; height:28px; border-radius:7px; border:1.5px solid var(--border); background:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; margin:0 auto; transition:all .15s; }
 .chkbtn.on { background:var(--green-lt); border-color:var(--green); }
-.amtcell { font-weight:600; }
+.amtcell { }
 .empty { text-align:center; padding:32px; color:var(--sub); font-size:13px; }
 .no-member { padding:12px 18px; color:var(--sub); font-size:13px; font-style:italic; }
 .mbg { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:200; display:flex; align-items:center; justify-content:center; }
@@ -387,7 +387,7 @@ function renderTable() {
     if (p.delivered) tr.className = "done";
 
     function mkTd(cls) { var t=document.createElement("td"); if(cls) t.className=cls; return t; }
-    var t1=mkTd(); t1.innerHTML=esc(p.memberName);
+    var t1=mkTd(); t1.style.textAlign="center"; t1.textContent=esc(p.memberName);
 
     var t2=mkTd("lk");
     var linkInput = document.createElement("input");
@@ -406,7 +406,7 @@ function renderTable() {
     var t3=mkTd("amtcell");
     var amtInput = document.createElement("input");
     amtInput.type = "text";
-    amtInput.value = p.amount+"원";
+    amtInput.value = p.amount.toLocaleString()+"원";
     amtInput.className = "edit-input edit-amt";
     amtInput.dataset.field = "amount";
     amtInput.dataset.id = p.id;
@@ -418,7 +418,7 @@ function renderTable() {
     amtInput.addEventListener("blur", function() {
       var n = parseInt(this.value) || 0;
       this.dataset.raw = n;
-      this.value = n+"원";
+      this.value = n.toLocaleString()+"원";
     });
     t3.appendChild(amtInput);
 
