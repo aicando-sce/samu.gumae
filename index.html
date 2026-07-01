@@ -113,8 +113,8 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
   <!-- 요약 카드 -->
   <div class="cards">
     <div class="card"><div class="lbl">분기 예산</div><div class="val blue" id="cBud">—</div></div>
-    <div class="card"><div class="lbl">총 사용액</div><div class="val yellow" id="cUsd">—</div></div>
-    <div class="card"><div class="lbl">잔액</div><div class="val green" id="cRem">—</div></div>
+    <div class="card"><div class="lbl">분기 사용 금액</div><div class="val yellow" id="cUsd">—</div></div>
+    <div class="card"><div class="lbl">분기 잔액</div><div class="val green" id="cRem">—</div></div>
     <div class="card"><div class="lbl">구매 건수</div><div class="val" id="cCnt">—</div></div>
     <div class="card"><div class="lbl">배송 완료 건수</div><div class="val" id="cDlv">—</div></div>
   </div>
@@ -398,7 +398,7 @@ function renderSummary() {
   var done = mps.filter(function(p) { return p.delivered; }).length;
   document.getElementById("mTitle").textContent = curMonth+"월 구매 내역";
   document.getElementById("mSum").innerHTML =
-    "<span>총 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
+    "<span>월 사용 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
     "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
 }
 
