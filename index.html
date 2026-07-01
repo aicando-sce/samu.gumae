@@ -371,7 +371,7 @@ function renderSummary() {
   var done = mps.filter(function(p) { return p.delivered; }).length;
   document.getElementById("mTitle").textContent = curMonth+"월 구매 내역";
   document.getElementById("mSum").innerHTML =
-    "<span>사용 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
+    "<span>총 금 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
     "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
 }
 
@@ -387,7 +387,7 @@ function renderTable() {
     if (p.delivered) tr.className = "done";
 
     function mkTd(cls) { var t=document.createElement("td"); if(cls) t.className=cls; return t; }
-    var t1=mkTd(); t1.innerHTML="<strong>"+esc(p.memberName)+"</strong>";
+    var t1=mkTd(); t1.innerHTML=esc(p.memberName);
 
     var t2=mkTd("lk");
     var linkInput = document.createElement("input");
@@ -406,7 +406,7 @@ function renderTable() {
     var t3=mkTd("amtcell");
     var amtInput = document.createElement("input");
     amtInput.type = "text";
-    amtInput.value = p.amount.toLocaleString()+"원";
+    amtInput.value = p.amount+"원";
     amtInput.className = "edit-input edit-amt";
     amtInput.dataset.field = "amount";
     amtInput.dataset.id = p.id;
@@ -418,7 +418,7 @@ function renderTable() {
     amtInput.addEventListener("blur", function() {
       var n = parseInt(this.value) || 0;
       this.dataset.raw = n;
-      this.value = n.toLocaleString()+"원";
+      this.value = n+"원";
     });
     t3.appendChild(amtInput);
 
@@ -435,7 +435,7 @@ function renderTable() {
     var cb=document.createElement("button");
     cb.className="chkbtn"+(p.delivered?" on":"");
     cb.title=p.delivered?"배송완료 취소":"배송완료 처리";
-    cb.textContent=p.delivered?"✅":"○";
+    cb.textContent=p.delivered?"✅":" ";
     cb.dataset.tog=p.id; t5.appendChild(cb);
 
     var t6=mkTd(); t6.style.textAlign="center";
@@ -480,7 +480,7 @@ function addPurchase() {
   var link = document.getElementById("addLnk").value.trim();
   var amt  = parseInt(document.getElementById("addAmt").value)||0;
   var memo = document.getElementById("addMmo").value.trim();
-  if (!name||!link||!amt) { alert("구매 사이트, 금액을 모두 입력해주세요."); return; }
+  if (!name||!link||!amt) { alert("팀원, 구매 사이트, 금액을 모두 입력해주세요."); return; }
   var ps = loadPurchases();
   ps.push({ id:"P"+Date.now(), month:curMonth, memberName:name, link:link, amount:amt, memo:memo, delivered:false });
   savePurchases(ps);
