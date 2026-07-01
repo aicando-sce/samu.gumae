@@ -31,7 +31,7 @@ select:focus, input:focus { border-color:var(--blue); }
 .btn-icon { width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
 .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
 .card { background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:16px 18px; box-shadow:var(--sh); }
-.card .lbl { font-size:11px; color:var(--sub); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.card .lbl { font-size:12px; color:var(--sub); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
 .card .val { font-size:22px; font-weight:700; letter-spacing:-.5px; }
 .val.blue{color:var(--blue)} .val.green{color:var(--green)} .val.red{color:var(--red)} .val.yellow{color:var(--yellow)}
 .tabs { display:flex; gap:4px; margin-bottom:20px; background:var(--white); border:1px solid var(--border); border-radius:var(--r); padding:6px; box-shadow:var(--sh); }
@@ -133,15 +133,15 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
         <select id="addMem"></select>
         <input type="text" id="addLnk" placeholder="구매 링크">
         <input type="number" id="addAmt" placeholder="금액(원)" step="100">
-        <input type="text" id="addMmo" placeholder="메(선택)">
+        <input type="text" id="addMmo" placeholder="메모(선택)">
         <button class="btn btn-blue" id="btnAdd">+ 추가</button>
       </div>
       <table>
         <thead><tr>
-          <th style="width:110px">팀원</th>
-          <th>구매 링크</th>
-          <th style="width:100px">금액</th>
-          <th style="width:80px">메모</th>
+          <th style="width:110px;text-align:center">팀원</th>
+          <th;text-align:center">구매 링크</th>
+          <th style="width:130px;text-align:center">금액</th>
+          <th style="width:130px;text-align:center">메모</th>
           <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
           <th style="width:50px;text-align:center">삭제</th>
         </tr></thead>
