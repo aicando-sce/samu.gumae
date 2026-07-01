@@ -371,7 +371,7 @@ function renderSummary() {
   var done = mps.filter(function(p) { return p.delivered; }).length;
   document.getElementById("mTitle").textContent = curMonth+"월 구매 내역";
   document.getElementById("mSum").innerHTML =
-    "<span>총 금 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
+    "<span>총 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
     "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
 }
 
