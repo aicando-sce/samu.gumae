@@ -106,7 +106,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
       <option value="4">4분기</option>
     </select>
     <label>분기 예산</label>
-    <input type="number" id="budIn" placeholder="예: 500000" step="10000" style="width:140px">
+    <input type="text" id="budIn" placeholder="예: 500000" step="10000" style="width:140px">
     <span style="font-size:12px;color:var(--sub)">※ 분기 내 월 합산 차감</span>
   </div>
 
@@ -248,10 +248,25 @@ function init() {
     var n = parseInt(this.value.replace(/[^0-9]/g,"")) || 0;
     this.value = n || "";
   });
+  budIn.addEventListener("keydown", function(e) {
+    // 숫자, 백스페이스, 삭제, 방향키, 탭 등 허용
+    var allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Home","End"];
+    if (allowed.indexOf(e.key) === -1 && !/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+    }
+    // 엔터 시 포맷 적용
+    if (e.key === "Enter") {
+      var n = parseInt(this.value.replace(/[^0-9]/g,"")) || 0;
+      saveBudget(n);
+      this.value = n ? n.toLocaleString()+"원" : "";
+      this.blur();
+      renderSummary();
+    }
+  });
   budIn.addEventListener("blur", function() {
     var n = parseInt(this.value.replace(/[^0-9]/g,"")) || 0;
     saveBudget(n);
-    this.value = n ? n.toLocaleString() : "";
+    this.value = n ? n.toLocaleString()+"원" : "";
     renderSummary();
   });
   document.getElementById("btnAddM").addEventListener("click", addMember);
