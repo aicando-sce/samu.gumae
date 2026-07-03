@@ -374,7 +374,7 @@ function renderDropdown() {
   section.style.display = "block";
   var placeholder = document.createElement("option");
   placeholder.value = ""; placeholder.textContent = "구매자";
-  placeholder.disabled = true; placeholder.selected = true;
+  placeholder.disabled = true; placeholder.selected = true; placeholder.hidden = true;
   sel.appendChild(placeholder);
   ms.forEach(function(name) {
     var o = document.createElement("option");
