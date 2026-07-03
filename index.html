@@ -372,6 +372,10 @@ function renderDropdown() {
   }
   noMember.style.display = "none";
   section.style.display = "block";
+  var placeholder = document.createElement("option");
+  placeholder.value = ""; placeholder.textContent = "팀원 선택";
+  placeholder.disabled = true; placeholder.selected = true;
+  sel.appendChild(placeholder);
   ms.forEach(function(name) {
     var o = document.createElement("option");
     o.value = name; o.textContent = name;
@@ -507,7 +511,7 @@ function addPurchase() {
   var link = document.getElementById("addLnk").value.trim();
   var amt  = parseInt(document.getElementById("addAmt").value)||0;
   var memo = document.getElementById("addMmo").value.trim();
-  if (!name||!link||!amt) { alert("팀원, 구매 사이트, 금액을 모두 입력해주세요."); return; }
+  if (!name||!link||!amt) { alert("팀원, 구매 링크/품목, 금액을 모두 입력해주세요."); return; }
   var ps = loadPurchases();
   ps.push({ id:"P"+Date.now(), month:curMonth, memberName:name, link:link, amount:amt, memo:memo, delivered:false });
   savePurchases(ps);
