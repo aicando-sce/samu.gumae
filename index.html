@@ -371,12 +371,18 @@ document.getElementById("mSum").innerHTML =
 "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
 
 var perPerson = document.getElementById("perPersonInfo");
-var cnt = firstMonthMemberCount > 0 ? firstMonthMemberCount : members.length;
-if (budget > 0 && cnt > 0) {
-var perAmt = Math.floor(budget / cnt / 1000) * 1000;
-perPerson.textContent = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원";
+if (budget > 0) {
+  apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }).then(function(r) {
+    var cnt = (r.names || []).length;
+    if (cnt > 0) {
+      var perAmt = Math.floor(budget / cnt / 1000) * 1000;
+      perPerson.textContent = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원";
+    } else {
+      perPerson.textContent = "※ 분기 내 월 합산 차감";
+    }
+  });
 } else {
-perPerson.textContent = "※ 분기 내 월 합산 차감";
+  perPerson.textContent = "※ 분기 내 월 합산 차감";
 }
 }
 
