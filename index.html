@@ -138,7 +138,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
         <thead><tr>
           <th style="width:110px;text-align:center">구매자</th>
           <th style="text-align:center">구매 링크</th>
-          <th style="width:130px;text-align:center">금액</th>
+          <th style="width:130px;text-align:center">금액(원)</th>
           <th style="width:130px;text-align:center">메모</th>
           <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
           <th style="width:50px;text-align:center">삭제</th>
@@ -411,11 +411,11 @@ function renderTable() {
 
     var t3=mkTd("amtcell");
     var ai=document.createElement("input"); ai.type="text";
-    ai.value=p.amount.toLocaleString()+"원";
+    ai.value=p.amount.toLocaleString();
     ai.className="edit-input edit-amt"; ai.dataset.field="amount"; ai.dataset.id=p.id;
     ai.dataset.raw=p.amount;
     ai.addEventListener("focus", function() { this.value=this.dataset.raw||p.amount; this.select(); });
-    ai.addEventListener("blur",  function() { var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n.toLocaleString()+"원"; });
+    ai.addEventListener("blur",  function() { var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n.toLocaleString(); });
     t3.appendChild(ai);
 
     var t4=mkTd();
