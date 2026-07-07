@@ -386,7 +386,7 @@ function renderSummary() {
     // 첫 달 기준 인원수는 loadAll 시점의 members가 curMonth 기준이므로
     // 첫 달을 별도로 가져오는 대신, 분기 시작 시 loadAll에서 첫 달 멤버를 저장
     var cnt = firstMonthMemberCount > 0 ? firstMonthMemberCount : members.length;
-    var perAmt = Math.floor(budget / cnt / 1000) * 100;
+    var perAmt = Math.floor(budget / cnt / 1000) * 1000;
     perPerson.textContent = "※ 인당 " + perAmt.toLocaleString() + "원";
   } else {
     perPerson.textContent = "※ 분기 내 월 합산 차감";
