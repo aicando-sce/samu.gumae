@@ -376,7 +376,7 @@ if (budget > 0) {
     var cnt = (r.names || []).length;
     if (cnt > 0) {
       var perAmt = Math.floor(budget / cnt / 1000) * 1000;
-      perPerson.textContent = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원   ※ ID: 추후 공지 / PW: 추후 공지";
+      perPerson.textContent = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원&nbsp;&nbsp;&nbsp;※ ID: 추후 공지 / PW: 추후 공지";
     } else {
       perPerson.textContent = "※ 분기 내 월 합산 차감";
     }
