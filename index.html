@@ -72,9 +72,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
 .modal { background:var(--white); border-radius:14px; padding:28px; width:440px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,.18); }
 .modal h3 { font-size:16px; font-weight:700; margin-bottom:18px; }
 .mbtns { display:flex; justify-content:flex-end; margin-top:16px; }
-/* 로딩 */
 .loading-bar { position:fixed; top:0; left:0; height:3px; background:var(--blue); transition:width .3s; z-index:999; }
-.spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin .6s linear infinite; vertical-align:middle; margin-left:6px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 @media(max-width:700px) {
 .cards{grid-template-columns:1fr 1fr} .addrow{grid-template-columns:1fr 1fr}
@@ -107,7 +105,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 </select>
 <label>분기 예산</label>
 <input type="text" id="budIn" placeholder="예: 500,000" style="width:140px">
-<span style="font-size:12px;color:var(--sub)">※ 분기 내 월 합산 차감</span>
+<span style="font-size:12px;color:var(--sub)" id="perPersonInfo">※ 분기 내 월 합산 차감</span>
 </div>
 
 <div class="cards">
@@ -138,7 +136,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <thead><tr>
 <th style="width:110px;text-align:center">구매자</th>
 <th style="text-align:center">구매 링크</th>
-          <th style="width:130px;text-align:center">금액(원)</th>
+<th style="width:130px;text-align:center">금액(원)</th>
 <th style="width:130px;text-align:center">메모</th>
 <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
 <th style="width:50px;text-align:center">삭제</th>
@@ -166,21 +164,18 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 </div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  ★ 여기에 Apps Script 배포 URL을 넣으세요 ★
 var API_URL = "https://script.google.com/macros/s/AKfycbxpeQoLlqoBiTnOw9NTVmEwGF60rFjpE08cdx5Opw7XrvTitbNWYfUbg20PHbh3dn_3Iw/exec";
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 var curMonth = 1;
-var purchases = [];   // 현재 분기 구매 내역 캐시
-var members = [];     // 현재 월 팀원 캐시
+var purchases = [];
+var members = [];
 var budget = 0;
+var firstMonthMemberCount = 0;
 
 function yr() { return parseInt(document.getElementById("yrSel").value); }
 function q()  { return parseInt(document.getElementById("qSel").value); }
 function qMonths() { return [[1,2,3],[4,5,6],[7,8,9],[10,11,12]][q()-1]; }
 
-// ── API 호출 헬퍼 ────────────────────────────
 function apiGet(params) {
 var url = API_URL + "?" + Object.keys(params).map(function(k) {
 return encodeURIComponent(k)+"="+encodeURIComponent(
@@ -190,12 +185,10 @@ typeof params[k] === "object" ? JSON.stringify(params[k]) : params[k]
 return fetch(url).then(function(r) { return r.json(); });
 }
 
-// CORS 우회: POST도 GET 쿼리스트링으로 전송
 function apiPost(body) {
 return apiGet(body);
 }
 
-// ── 로딩 바 ─────────────────────────────────
 var loadCount = 0;
 function startLoad() {
 loadCount++;
@@ -212,9 +205,6 @@ document.getElementById("loadingBar").style.width = "0%";
 }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  INIT
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function init() {
 var yrSel = document.getElementById("yrSel");
 var now = new Date();
@@ -283,19 +273,18 @@ curMonth = qMonths()[0];
 loadAll();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  데이터 로드
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function loadAll() {
 startLoad();
 Promise.all([
 apiGet({ action:"getPurchases", year:yr(), quarter:q() }),
 apiGet({ action:"getMembers",   year:yr(), month:curMonth }),
-apiGet({ action:"getBudget",    year:yr(), quarter:q() })
+apiGet({ action:"getBudget",    year:yr(), quarter:q() }),
+apiGet({ action:"getMembers",   year:yr(), month:qMonths()[0] })
 ]).then(function(results) {
 purchases = results[0].purchases || [];
 members   = results[1].names || [];
 budget    = results[2].amount || 0;
+firstMonthMemberCount = (results[3].names || []).length;
 document.getElementById("budIn").value = budget ? budget.toLocaleString()+"원" : "";
 renderTabs(); renderDropdown(); renderTable(); renderSummary();
 endLoad();
@@ -315,9 +304,6 @@ return members;
 });
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  RENDER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function renderTabs() {
 var row = document.getElementById("tabRow");
 row.innerHTML = "";
@@ -383,6 +369,15 @@ document.getElementById("mTitle").textContent = curMonth+"월 구매 내역";
 document.getElementById("mSum").innerHTML =
 "<span>월 사용 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
 "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
+
+var perPerson = document.getElementById("perPersonInfo");
+var cnt = firstMonthMemberCount > 0 ? firstMonthMemberCount : members.length;
+if (budget > 0 && cnt > 0) {
+var perAmt = Math.floor(budget / cnt / 1000) * 1000;
+perPerson.textContent = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원";
+} else {
+perPerson.textContent = "※ 분기 내 월 합산 차감";
+}
 }
 
 function renderTable() {
@@ -411,11 +406,11 @@ a.className="lk-open"; a.title="새 탭에서 열기"; a.textContent="↗"; t2.a
 
 var t3=mkTd("amtcell");
 var ai=document.createElement("input"); ai.type="text";
-    ai.value=p.amount.toLocaleString();
+ai.value=p.amount.toLocaleString();
 ai.className="edit-input edit-amt"; ai.dataset.field="amount"; ai.dataset.id=p.id;
 ai.dataset.raw=p.amount;
 ai.addEventListener("focus", function() { this.value=this.dataset.raw||p.amount; this.select(); });
-    ai.addEventListener("blur",  function() { var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n.toLocaleString(); });
+ai.addEventListener("blur",  function() { var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n.toLocaleString(); });
 t3.appendChild(ai);
 
 var t4=mkTd();
@@ -466,9 +461,6 @@ document.getElementById("newName").focus();
 }
 function closeMemberModal() { document.getElementById("memberModal").style.display="none"; }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  팀원 액션
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function addMember() {
 var name = document.getElementById("newName").value.trim();
 if (!name) return;
@@ -489,9 +481,6 @@ renderMembers(); renderDropdown(); renderTable(); endLoad();
 });
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  구매 액션
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function addPurchase() {
 var sel  = document.getElementById("addMem");
 var name = sel.value;
@@ -543,9 +532,6 @@ apiPost({ action:"saveBudget", year:yr(), quarter:q(), amount:n });
 renderSummary();
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  내보내기
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function doExport() {
 var csv = "월,구매자,구매 링크,금액,메모,배송완료\n";
 qMonths().forEach(function(m) {
