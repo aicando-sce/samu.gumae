@@ -106,7 +106,6 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <label>분기 예산</label>
 <input type="text" id="budIn" placeholder="예: 500,000" style="width:140px">
 <span style="font-size:12px;color:var(--sub)" id="perPersonInfo"></span>
-<span style="font-size:12px;color:var(--sub);margin-left:auto">※ ID: 추후 공지 / PW: 추후 공지</span>
 </div>
 
 <div class="cards">
@@ -377,7 +376,7 @@ if (budget > 0) {
     var cnt = (r.names || []).length;
     if (cnt > 0) {
       var perAmt = Math.floor(budget / cnt / 1000) * 1000;
-      perPerson.innerHTML = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원";
+      perPerson.innerHTML = "※ 분기 내 인당 " + perAmt.toLocaleString() + "원 ※ ID: 추후 공지 / PW: 추후 공지";
     } else {
       perPerson.textContent = "※ 분기 내 월 합산 차감";
     }
