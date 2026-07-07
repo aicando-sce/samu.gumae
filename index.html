@@ -107,7 +107,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
     </select>
     <label>분기 예산</label>
     <input type="text" id="budIn" placeholder="예: 500,000" style="width:140px">
-    <span style="font-size:12px;color:var(--sub)">※ 분기 내 월 합산 차감</span>
+    <span style="font-size:13px;color:var(--sub)" id="perPersonInfo">※ 분기 내 월 합산 차감</span>
   </div>
 
   <div class="cards">
@@ -175,6 +175,7 @@ var curMonth = 1;
 var purchases = [];   // 현재 분기 구매 내역 캐시
 var members = [];     // 현재 월 팀원 캐시
 var budget = 0;
+var firstMonthMemberCount = 0;
 
 function yr() { return parseInt(document.getElementById("yrSel").value); }
 function q()  { return parseInt(document.getElementById("qSel").value); }
@@ -296,6 +297,7 @@ function loadAll() {
     purchases = results[0].purchases || [];
     members   = results[1].names || [];
     budget    = results[2].amount || 0;
+    firstMonthMemberCount = (results[3].names || []).length;
     document.getElementById("budIn").value = budget ? budget.toLocaleString()+"원" : "";
     renderTabs(); renderDropdown(); renderTable(); renderSummary();
     endLoad();
@@ -375,15 +377,20 @@ function renderSummary() {
   re.className = "val "+(remain<0?"red":"green");
   document.getElementById("cCnt").textContent = ps.length+"건";
   document.getElementById("cDlv").textContent = ps.filter(function(p){ return p.delivered; }).length+"건";
-
-  var mps = ps.filter(function(p) { return p.month===curMonth; });
-  var mTotal = mps.reduce(function(s,p) { return s+p.amount; }, 0);
-  var done = mps.filter(function(p) { return p.delivered; }).length;
-  document.getElementById("mTitle").textContent = curMonth+"월 구매 내역";
-  document.getElementById("mSum").innerHTML =
-    "<span>월 사용 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
-    "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
-}
+ 
+  // 인당 금액: 분기 첫 달 팀원 수 기준, 1000원 단위 버림
+  var firstMonth = qMonths()[0];
+  var perPerson = document.getElementById("perPersonInfo");
+  if (budget > 0 && members.length > 0) {
+    // 현재 보고 있는 달이 첫 달이면 현재 members 사용, 아니면 firstMonthMembers 별도 로드 불필요 (이미 캐시)
+    // 첫 달 기준 인원수는 loadAll 시점의 members가 curMonth 기준이므로
+    // 첫 달을 별도로 가져오는 대신, 분기 시작 시 loadAll에서 첫 달 멤버를 저장
+    var cnt = firstMonthMemberCount > 0 ? firstMonthMemberCount : members.length;
+    var perAmt = Math.floor(budget / cnt / 1000) * 100;
+    perPerson.textContent = "※ 인당 " + perAmt.toLocaleString() + "원";
+  } else {
+    perPerson.textContent = "※ 분기 내 월 합산 차감";
+  }
 
 function renderTable() {
   var tb = document.getElementById("tbody");
