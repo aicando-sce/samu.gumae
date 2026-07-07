@@ -129,7 +129,7 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
     <div id="purchaseSection">
       <div class="addrow">
         <select id="addMem"></select>
-        <input type="text" id="addLnk" placeholder="구매 사이트(링크)">
+        <input type="text" id="addLnk" placeholder="구매 링크">
         <input type="number" id="addAmt" placeholder="금액(원)">
         <input type="text" id="addMmo" placeholder="메모(선택)">
         <button class="btn btn-blue" id="btnAdd">+ 추가</button>
@@ -137,8 +137,8 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
       <table>
         <thead><tr>
           <th style="width:110px;text-align:center">팀원</th>
-          <th style="text-align:center">구매 사이트(링크)</th>
-          <th style="width:130px;text-align:center">금액</th>
+          <th style="text-align:center">구매 링크</th>
+          <th style="width:130px;text-align:center">금액(원)</th>
           <th style="width:130px;text-align:center">메모</th>
           <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
           <th style="width:50px;text-align:center">삭제</th>
@@ -498,7 +498,7 @@ function addPurchase() {
   var link = document.getElementById("addLnk").value.trim();
   var amt  = parseInt(document.getElementById("addAmt").value)||0;
   var memo = document.getElementById("addMmo").value.trim();
-  if (!name||!link||!amt) { alert("팀원, 구매 사이트(링크), 금액을 모두 입력해주세요."); return; }
+  if (!name||!link||!amt) { alert("팀원, 구매 링크, 금액을 모두 입력해주세요."); return; }
   startLoad();
   apiPost({ action:"addPurchase", year:yr(), quarter:q(), month:curMonth, memberName:name, link:link, amount:amt, memo:memo }).then(function(r) {
     purchases.push({ id:r.id, month:curMonth, year:yr(), quarter:q(), memberName:name, link:link, amount:amt, memo:memo, delivered:false });
@@ -547,7 +547,7 @@ function doSaveBudget(n) {
 //  내보내기
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function doExport() {
-  var csv = "월,팀원,구매 사이트,금액,메모,배송완료\n";
+  var csv = "월,팀원,구매 링크,금액,메모,배송완료\n";
   qMonths().forEach(function(m) {
     purchases.filter(function(p) { return p.month===m; }).forEach(function(p) {
       csv += [m+"월",p.memberName,p.link,p.amount,p.memo||"",p.delivered?"완료":"미완료"]
