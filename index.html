@@ -329,7 +329,7 @@ var perPerson=document.getElementById("perPersonInfo");
 if (budget>0) {
 apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }).then(function(r){
 var cnt=(r.names||[]).length;
-if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000-2000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro22 / PW: ansrnfb123!@#"; }
+if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000-(members.length * 3000); perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro22 / PW: ansrnfb123!@#"; }
 else { perPerson.innerHTML=""; }
 });
 } else { perPerson.innerHTML=""; }
