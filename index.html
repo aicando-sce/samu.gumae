@@ -128,15 +128,15 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <div class="addrow">
 <select id="addMem"></select>
 <button class="btn-yangdo" id="btnYangdo">💸 양도 받기</button>
-<input type="text" id="addLnk" placeholder="구매 링크">
-<input type="number" id="addAmt" placeholder="총 금액(배송비 포함)">
+<input type="text" id="addLnk" placeholder="구매 품목">
+<input type="number" id="addAmt" placeholder="총 금액(배송비 제외)">
 <input type="text" id="addMmo" placeholder="비고">
 <button class="btn btn-blue" id="btnAdd">+ 추가</button>
 </div>
 <table>
 <thead><tr>
 <th style="width:100px;text-align:center">구매자</th>
-<th style="text-align:center">구매 링크</th>
+<th style="text-align:center">구매 품목</th>
 <th style="width:120px;text-align:center">총 금액(원)</th>
 <th style="width:180px;text-align:center">양도인 / 양도금액</th>
 <th style="width:120px;text-align:center">비고</th>
@@ -329,7 +329,7 @@ var perPerson=document.getElementById("perPersonInfo");
 if (budget>0) {
 apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }).then(function(r){
 var cnt=(r.names||[]).length;
-if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro22 / PW: ansrnfb123!@#"; }
+if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000-2000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro22 / PW: ansrnfb123!@#"; }
 else { perPerson.innerHTML=""; }
 });
 } else { perPerson.innerHTML=""; }
@@ -448,7 +448,7 @@ var sel=document.getElementById("addMem"); var name=sel.value;
 var link=document.getElementById("addLnk").value.trim();
 var amt=parseInt(document.getElementById("addAmt").value)||0;
 var memo=document.getElementById("addMmo").value.trim();
-if (!name||!link||!amt) { alert("구매자, 구매 링크, 금액을 모두 입력해주세요."); return; }
+if (!name||!link||!amt) { alert("구매자, 구매 품목, 금액을 모두 입력해주세요."); return; }
 startLoad();
 apiPost({ action:"addPurchase", year:yr(), quarter:q(), month:curMonth, memberName:name, link:link, amount:amt, memo:memo, fromName:pendingYangdoFrom, fromAmt:pendingYangdoAmt }).then(function(r){
 purchases.push({ id:r.id, month:curMonth, year:yr(), quarter:q(), memberName:name, link:link, amount:amt, memo:memo, fromName:pendingYangdoFrom, fromAmt:pendingYangdoAmt, delivered:false });
@@ -485,7 +485,7 @@ renderSummary();
 function doSaveBudget(n) { budget=n; apiPost({ action:"saveBudget", year:yr(), quarter:q(), amount:n }); renderSummary(); }
 
 function doExport() {
-var csv="월,구매자,구매 링크,총 금액,양도인,양도금액,비고,배송완료\n";
+var csv="월,구매자,구매 품목,총 금액,양도인,양도금액,비고,배송완료\n";
 qMonths().forEach(function(m){
 purchases.filter(function(p){ return p.month===m; }).forEach(function(p){
 csv+=[m+"월",p.memberName,p.link,p.amount,p.fromName||"",p.fromAmt||0,p.memo||"",p.delivered?"완료":"미완료"]
