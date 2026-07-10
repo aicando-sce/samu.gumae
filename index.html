@@ -411,7 +411,7 @@ mi.className="edit-input"; mi.dataset.field="memo"; mi.dataset.id=p.id; t5.appen
 
 var t6=mkTd(); t6.style.textAlign="center";
 var cb=document.createElement("button"); cb.className="chkbtn"+(p.delivered?" on":"");
-cb.title=p.delivered?"배송완료 취소":"배송완료 처리"; cb.textContent=p.delivered?"✅":"○"; cb.dataset.tog=p.id; t6.appendChild(cb);
+cb.title=p.delivered?"배송완료 취소":"배송완료 처리"; cb.textContent=p.delivered?"✅":""; cb.dataset.tog=p.id; t6.appendChild(cb);
 
 var t7=mkTd(); t7.style.textAlign="center";
 var db=document.createElement("button"); db.className="btn btn-red btn-icon"; db.title="삭제"; db.dataset.del=p.id;
@@ -530,82 +530,82 @@ function renderMyBalance() {
   if (!name) { alert("이름을 선택해주세요."); return; }
 
   var result = document.getElementById("myBalanceResult");
-  result.innerHTML = '<div style="text-align:center;padding:16px;color:var(--sub)">불러오는 중...</div>';
-
-  // 분기 전체 구매 내역에서 해당 팀원 데이터 필터
-  var myPurchases = purchases.filter(function(p) { return p.memberName === name; });
-  // 내가 양도해준 내역 (다른 사람 구매에 fromName이 나인 경우)
-  var yangdoGivenList = purchases.filter(function(p) { return p.fromName === name && p.fromAmt > 0; });
 
   var months = qMonths();
   var html = '';
-  var totalAmount = 0;
-  var totalYangdoReceived = 0;
-  var totalYangdoGiven = 0;
+
+  // 집계 변수
+  var totalPurchase = 0;
+  var totalReceived = 0;
+  var totalGiven = 0;
+
+  // 흰색 테이블
+  html += '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px">';
+  html += '<tr style="background:var(--bg)"><th style="padding:8px 10px;text-align:center;border-bottom:2px solid var(--border);white-space:nowrap;width:60px">월</th><th style="padding:8px 10px;text-align:left;border-bottom:2px solid var(--border)">구분</th><th style="padding:8px 10px;text-align:right;border-bottom:2px solid var(--border);white-space:nowrap;width:100px">금액</th></tr>';
+
+  var hasAny = false;
 
   months.forEach(function(m) {
-    var mps = myPurchases.filter(function(p) { return p.month === m; });
-    var mGiven = yangdoGivenList.filter(function(p) { return p.month === m; });
-    if (mps.length === 0 && mGiven.length === 0) return;
+    // 내 구매 내역
+    var mps = purchases.filter(function(p){ return p.month===m && p.memberName===name; });
+    // 내가 양도해준 내역 (다른 사람 구매에 fromName이 나)
+    var mGiven = purchases.filter(function(p){ return p.month===m && p.fromName===name && p.fromAmt>0; });
+    // 내가 양도받은 내역 (내 구매에 fromAmt가 있는 것)
+    var mReceived = mps.filter(function(p){ return p.fromAmt>0; });
 
-    var mTotal = mps.reduce(function(s,p){ return s+p.amount; }, 0);
-    var mReceived = mps.reduce(function(s,p){ return s+(p.fromAmt||0); }, 0);
-    var mGivenAmt = mGiven.reduce(function(s,p){ return s+(p.fromAmt||0); }, 0);
-    totalAmount += mTotal;
-    totalYangdoReceived += mReceived;
-    totalYangdoGiven += mGivenAmt;
+    mps.forEach(function(p) {
+      hasAny = true;
+      totalPurchase += p.amount;
+      html += '<tr><td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;color:var(--sub)">' + m + '월</td>';
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border)">' + (p.link||'(품목 없음)') + '</td>';
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap">-' + p.amount.toLocaleString() + '원</td></tr>';
+    });
 
-    html += '<div style="margin-bottom:16px">';
-    html += '<div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--blue-lt)">' + m + '월</div>';
+    mReceived.forEach(function(p) {
+      hasAny = true;
+      totalReceived += p.fromAmt;
+      html += '<tr style="background:#f0fdf4"><td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;color:var(--sub)">' + m + '월</td>';
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--green)">' + p.fromName + '에게 양도받음</td>';
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;color:var(--green);font-weight:600">+' + p.fromAmt.toLocaleString() + '원</td></tr>';
+    });
 
-    if (mps.length > 0 || mGiven.length > 0) {
-      html += '<table style="width:100%;border-collapse:collapse;margin-bottom:6px;font-size:12px;table-layout:fixed">';
-      html += '<colgroup><col style="width:auto"><col style="width:80px"><col style="width:100px"><col style="width:100px"><col style="width:40px"></colgroup>';
-      html += '<tr style="background:var(--bg)"><th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap">구매 품목</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap">금액</th><th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap">양도받은금액</th><th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap">양도한금액</th><th style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap">배송</th></tr>';
-      mps.forEach(function(p) {
-        html += '<tr><td style="padding:6px 8px;border-bottom:1px solid var(--border);word-break:break-all">' + (p.link||'') + '</td>';
-        html += '<td style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap">' + p.amount.toLocaleString() + '원</td>';
-        html += '<td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--green)">' + (p.fromAmt>0 ? p.fromName+'<br>+'+p.fromAmt.toLocaleString()+'원' : '—') + '</td>';
-        html += '<td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border)">—</td>';
-        html += '<td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border)">' + (p.delivered?'✅':'') + '</td></tr>';
-      });
-      mGiven.forEach(function(p) {
-        html += '<tr style="background:#fffbeb"><td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--yellow);word-break:break-all">' + p.memberName + '에게 양도 (' + (p.link||'') + ')</td>';
-        html += '<td style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--border)">—</td>';
-        html += '<td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border)">—</td>';
-        html += '<td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--yellow);font-weight:600">-' + p.fromAmt.toLocaleString() + '원</td>';
-        html += '<td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--border)"></td></tr>';
-      });
-      html += '</table>';
-    }
-
-    html += '<div style="font-size:12px;text-align:right;color:var(--sub);margin-top:4px">';
-    html += m + '월 사용: <strong>' + mTotal.toLocaleString() + '원</strong>';
-    if (mReceived > 0) html += ' | 양도받음: <strong style="color:var(--green)">+' + mReceived.toLocaleString() + '원</strong>';
-    if (mGivenAmt > 0) html += ' | 양도해줌: <strong style="color:var(--yellow)">-' + mGivenAmt.toLocaleString() + '원</strong>';
-    html += '</div>';
-    html += '</div>';
+    mGiven.forEach(function(p) {
+      hasAny = true;
+      totalGiven += p.fromAmt;
+      html += '<tr style="background:#fffbeb"><td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;color:var(--sub)">' + m + '월</td>';
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);color:var(--yellow)">' + p.memberName + '에게 양도함</td>';
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;color:var(--yellow);font-weight:600">-' + p.fromAmt.toLocaleString() + '원</td></tr>';
+    });
   });
 
-  // 분기 합계
-  var netAmount = totalAmount - totalYangdoReceived + totalYangdoGiven;
-  var perAmt = firstMonthMemberCount > 0 ? Math.floor(budget / firstMonthMemberCount / 1000) * 1000 - 3000 : 0;
-  var remain = perAmt - netAmount;
+  if (!hasAny) {
+    html += '<tr><td colspan="3" style="padding:20px;text-align:center;color:var(--sub)">내역이 없습니다.</td></tr>';
+  }
 
-  html += '<div style="background:var(--blue);color:#fff;border-radius:10px;padding:16px;margin-top:8px">';
-  html += '<div style="font-size:13px;font-weight:700;margin-bottom:10px">📊 ' + yr() + '년 ' + q() + '분기 나의 정산</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">';
-  html += '<div>인당 예산</div><div style="text-align:right;font-weight:700">' + perAmt.toLocaleString() + '원</div>';
-  html += '<div>총 구매금액</div><div style="text-align:right">' + totalAmount.toLocaleString() + '원</div>';
-  if (totalYangdoReceived > 0) html += '<div>양도받은 금액</div><div style="text-align:right;color:#86efac">-' + totalYangdoReceived.toLocaleString() + '원</div>';
-  if (totalYangdoGiven > 0) html += '<div>양도해준 금액</div><div style="text-align:right;color:#fde68a">+' + totalYangdoGiven.toLocaleString() + '원</div>';
-  html += '<div style="border-top:1px solid rgba(255,255,255,.3);padding-top:8px;font-weight:700">실부담금액</div><div style="text-align:right;border-top:1px solid rgba(255,255,255,.3);padding-top:8px;font-weight:700">' + netAmount.toLocaleString() + '원</div>';
-  html += '<div style="font-size:15px;font-weight:700">잔액</div>';
-  html += '<div style="text-align:right;font-size:15px;font-weight:700;color:' + (remain<0?'#fca5a5':'#86efac') + '">' + remain.toLocaleString() + '원</div>';
+  html += '</table>';
+
+  // 파란 정산 칸
+  var perAmt = firstMonthMemberCount > 0 ? Math.floor(budget / firstMonthMemberCount / 1000) * 1000 - 3000 : 0;
+  var remain = perAmt - totalPurchase + totalReceived - totalGiven;
+
+  html += '<div style="background:var(--blue);color:#fff;border-radius:10px;padding:16px">';
+  html += '<div style="font-size:13px;font-weight:700;margin-bottom:12px">📊 ' + yr() + '년 ' + q() + '분기 나의 사용 금액</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr auto;gap:6px 16px;font-size:13px">';
+  html += '<div>인당 예산</div><div style="text-align:right;font-weight:600">' + perAmt.toLocaleString() + '원</div>';
+  html += '<div>총 구매 금액</div><div style="text-align:right">-' + totalPurchase.toLocaleString() + '원</div>';
+  if (totalReceived > 0) {
+    html += '<div>양도받은 금액</div><div style="text-align:right;color:#86efac">+' + totalReceived.toLocaleString() + '원</div>';
+  }
+  if (totalGiven > 0) {
+    html += '<div>양도한 금액</div><div style="text-align:right;color:#fde68a">-' + totalGiven.toLocaleString() + '원</div>';
+  }
+  html += '<div style="border-top:1px solid rgba(255,255,255,.4);padding-top:8px;margin-top:4px;font-size:14px;font-weight:700">잔액</div>';
+  html += '<div style="border-top:1px solid rgba(255,255,255,.4);padding-top:8px;margin-top:4px;text-align:right;font-size:14px;font-weight:700;color:' + (remain<0?'#fca5a5':'#86efac') + '">' + remain.toLocaleString() + '원</div>';
   html += '</div></div>';
 
   result.innerHTML = html;
 }
+
 
 function doExport() {
 var csv="월,구매자,양도인,양도금액,구매 품목,금액,비고,배송완료\n";
