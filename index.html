@@ -366,13 +366,13 @@ ai.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.datas
 t3.appendChild(ai);
 
 // 양도인 / 양도금액 칸
-var t4=mkTd();
-var fromSel=document.createElement("select"); fromSel.className="edit-input"; fromSel.dataset.field="fromName"; fromSel.dataset.id=p.id; fromSel.style.cssText="font-size:12px;margin-bottom:3px";
+var t4=mkTd(); t4.style.textAlign="center";
+var fromSel=document.createElement("select"); fromSel.className="edit-input"; fromSel.dataset.field="fromName"; fromSel.dataset.id=p.id; fromSel.style.cssText="font-size:12px;width:80px";
 var emptyOpt=document.createElement("option"); emptyOpt.value=""; emptyOpt.textContent="—"; fromSel.appendChild(emptyOpt);
 members.forEach(function(mname){ var mo=document.createElement("option"); mo.value=mname; mo.textContent=mname; if(mname===(p.fromName||"")) mo.selected=true; fromSel.appendChild(mo); });
 var fromAi=document.createElement("input"); fromAi.type="text";
 fromAi.value=(p.fromAmt&&p.fromAmt>0)?p.fromAmt.toLocaleString()+"원":"";
-fromAi.placeholder="양도금액"; fromAi.className="edit-input edit-amt"; fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0; fromAi.style.fontSize="12px";
+fromAi.placeholder="양도금액"; fromAi.className="edit-input"; fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0; fromAi.style.cssText="font-size:12px";
 fromAi.addEventListener("focus",function(){ this.value=this.dataset.raw>0?this.dataset.raw:""; this.select(); });
 fromAi.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n?n.toLocaleString()+"원":""; });
 var yCell=document.createElement("div"); yCell.className="yangdo-cell"; yCell.appendChild(fromSel); yCell.appendChild(fromAi); t4.appendChild(yCell);
