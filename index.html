@@ -129,7 +129,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <select id="addMem"></select>
 <button class="btn-yangdo" id="btnYangdo">💸 양도 받기</button>
 <input type="text" id="addLnk" placeholder="구매 품목">
-<input type="number" id="addAmt" placeholder="총 금액(배송비 제외)">
+<input type="number" id="addAmt" placeholder="금액(배송비 제외)">
 <input type="text" id="addMmo" placeholder="비고">
 <button class="btn btn-blue" id="btnAdd">+ 추가</button>
 </div>
@@ -138,7 +138,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <th style="width:100px;text-align:center">구매자</th>
 <th style="width:180px;text-align:center">양도인 / 양도금액</th>
 <th style="text-align:center">구매 품목</th>
-<th style="width:120px;text-align:center">총 금액(원)</th>
+<th style="width:120px;text-align:center">금액(원)</th>
 <th style="width:120px;text-align:center">비고</th>
 <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
 <th style="width:50px;text-align:center">삭제</th>
@@ -485,7 +485,7 @@ renderSummary();
 function doSaveBudget(n) { budget=n; apiPost({ action:"saveBudget", year:yr(), quarter:q(), amount:n }); renderSummary(); }
 
 function doExport() {
-var csv="월,구매자,구매 품목,총 금액,양도인,양도금액,비고,배송완료\n";
+var csv="월,구매자,양도인,양도금액,구매 품목,금액,비고,배송완료\n";
 qMonths().forEach(function(m){
 purchases.filter(function(p){ return p.month===m; }).forEach(function(p){
 csv+=[m+"월",p.memberName,p.link,p.amount,p.fromName||"",p.fromAmt||0,p.memo||"",p.delivered?"완료":"미완료"]
