@@ -345,8 +345,10 @@ ps.forEach(function(p) {
 var tr=document.createElement("tr"); if (p.delivered) tr.className="done";
 function mkTd(cls){ var t=document.createElement("td"); if(cls) t.className=cls; return t; }
 
+// 구매자 칸
 var t1=mkTd(); t1.style.textAlign="center"; t1.textContent=p.memberName;
 
+// 구매 품목 칸
 var t2=mkTd("lk");
 var li=document.createElement("input"); li.type="text"; li.value=p.link;
 li.className="edit-input"; li.dataset.field="link"; li.dataset.id=p.id; t2.appendChild(li);
@@ -355,6 +357,7 @@ var a=document.createElement("a"); a.href=p.link; a.target="_blank"; a.rel="noop
 a.className="lk-open"; a.title="새 탭에서 열기"; a.textContent="↗"; t2.appendChild(a);
 }
 
+// 금액 칸
 var t3=mkTd("amtcell");
 var ai=document.createElement("input"); ai.type="text"; ai.value=p.amount.toLocaleString();
 ai.className="edit-input edit-amt"; ai.dataset.field="amount"; ai.dataset.id=p.id; ai.dataset.raw=p.amount;
@@ -369,19 +372,22 @@ var emptyOpt=document.createElement("option"); emptyOpt.value=""; emptyOpt.textC
 members.forEach(function(mname){ var mo=document.createElement("option"); mo.value=mname; mo.textContent=mname; if(mname===(p.fromName||"")) mo.selected=true; fromSel.appendChild(mo); });
 var fromAi=document.createElement("input"); fromAi.type="text";
 fromAi.value=(p.fromAmt&&p.fromAmt>0)?p.fromAmt.toLocaleString()+"원":"";
-fromAi.placeholder="양도금액"; fromAi.className="edit-input edit-amt"; fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0; fromAi.style.fontSize="12px";
+fromAi.placeholder="양도금액"; fromAi.className="edit-input edit-amt"; fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0; fromAi.style.fontSize="12px;text-align:center";
 fromAi.addEventListener("focus",function(){ this.value=this.dataset.raw>0?this.dataset.raw:""; this.select(); });
 fromAi.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n?n.toLocaleString()+"원":""; });
 var yCell=document.createElement("div"); yCell.className="yangdo-cell"; yCell.appendChild(fromSel); yCell.appendChild(fromAi); t4.appendChild(yCell);
 
+// 비고 칸
 var t5=mkTd();
 var mi=document.createElement("input"); mi.type="text"; mi.value=p.memo||"";
 mi.className="edit-input"; mi.dataset.field="memo"; mi.dataset.id=p.id; t5.appendChild(mi);
 
+// 배송완료 칸
 var t6=mkTd(); t6.style.textAlign="center";
 var cb=document.createElement("button"); cb.className="chkbtn"+(p.delivered?" on":"");
 cb.title=p.delivered?"배송완료 취소":"배송완료 처리"; cb.textContent=p.delivered?"✅":"○"; cb.dataset.tog=p.id; t6.appendChild(cb);
 
+// 삭제 칸
 var t7=mkTd(); t7.style.textAlign="center";
 var db=document.createElement("button"); db.className="btn btn-red btn-icon"; db.title="삭제"; db.dataset.del=p.id;
 db.innerHTML='<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'; t7.appendChild(db);
