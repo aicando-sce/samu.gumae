@@ -252,7 +252,7 @@ if (t) doToggle(t.dataset.tog);
 });
 document.getElementById("tbody").addEventListener("change", function(e) {
 var inp=e.target.closest(".edit-input");
-if (inp) doEdit(inp.dataset.id, inp.dataset.field, inp.value);
+if (inp && inp.dataset.field !== "fromAmt") doEdit(inp.dataset.id, inp.dataset.field, inp.value);
 });
 document.getElementById("memberList").addEventListener("click", function(e) {
 var b=e.target.closest("[data-rmv]"); if (b) removeMember(b.dataset.rmv);
@@ -345,10 +345,8 @@ ps.forEach(function(p) {
 var tr=document.createElement("tr"); if (p.delivered) tr.className="done";
 function mkTd(cls){ var t=document.createElement("td"); if(cls) t.className=cls; return t; }
 
-// 구매자 칸
 var t1=mkTd(); t1.style.textAlign="center"; t1.textContent=p.memberName;
 
-// 구매 품목 칸
 var t2=mkTd("lk");
 var li=document.createElement("input"); li.type="text"; li.value=p.link;
 li.className="edit-input"; li.dataset.field="link"; li.dataset.id=p.id; t2.appendChild(li);
@@ -357,7 +355,6 @@ var a=document.createElement("a"); a.href=p.link; a.target="_blank"; a.rel="noop
 a.className="lk-open"; a.title="새 탭에서 열기"; a.textContent="↗"; t2.appendChild(a);
 }
 
-// 금액 칸
 var t3=mkTd("amtcell");
 var ai=document.createElement("input"); ai.type="text"; ai.value=p.amount.toLocaleString();
 ai.className="edit-input edit-amt"; ai.dataset.field="amount"; ai.dataset.id=p.id; ai.dataset.raw=p.amount;
@@ -365,29 +362,38 @@ ai.addEventListener("focus",function(){ this.value=this.dataset.raw||p.amount; t
 ai.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n.toLocaleString(); });
 t3.appendChild(ai);
 
-// 양도인 / 양도금액 칸
-var t4=mkTd();
-var fromSel=document.createElement("select"); fromSel.className="edit-input"; fromSel.dataset.field="fromName"; fromSel.dataset.id=p.id; fromSel.style.cssText="font-size:12px;width:80px";
+// 양도인 / 양도금액 칸 — blur에서 직접 doEdit 호출
+var t4=mkTd(); t4.style.textAlign="center";
+var fromSel=document.createElement("select");
+fromSel.className="edit-input"; fromSel.dataset.field="fromName"; fromSel.dataset.id=p.id;
+fromSel.style.cssText="font-size:12px;width:80px";
 var emptyOpt=document.createElement("option"); emptyOpt.value=""; emptyOpt.textContent="—"; fromSel.appendChild(emptyOpt);
 members.forEach(function(mname){ var mo=document.createElement("option"); mo.value=mname; mo.textContent=mname; if(mname===(p.fromName||"")) mo.selected=true; fromSel.appendChild(mo); });
+fromSel.addEventListener("change",(function(pid){ return function(){ doEdit(pid,"fromName",this.value); }; })(p.id));
+
 var fromAi=document.createElement("input"); fromAi.type="text";
-fromAi.value=(p.fromAmt&&p.fromAmt>0)?p.fromAmt.toLocaleString()+"원":"";
-fromAi.placeholder="양도금액"; fromAi.className="edit-input"; fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0; fromAi.style.cssText="font-size:12px;text-align:center";
+fromAi.value=(p.fromAmt&&p.fromAmt>0)?p.fromAmt.toLocaleString():"";
+fromAi.placeholder="양도금액"; fromAi.className="edit-input edit-amt";
+fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0;
+fromAi.style.cssText="font-size:12px";
 fromAi.addEventListener("focus",function(){ this.value=this.dataset.raw>0?this.dataset.raw:""; this.select(); });
-fromAi.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n?n.toLocaleString():""; });
+fromAi.addEventListener("blur",(function(pid){ return function(){
+var n=parseInt(this.value)||0;
+this.dataset.raw=n;
+this.value=n?n.toLocaleString():"";
+doEdit(pid,"fromAmt",n);
+}; })(p.id));
+
 var yCell=document.createElement("div"); yCell.className="yangdo-cell"; yCell.appendChild(fromSel); yCell.appendChild(fromAi); t4.appendChild(yCell);
 
-// 비고 칸
 var t5=mkTd();
 var mi=document.createElement("input"); mi.type="text"; mi.value=p.memo||"";
 mi.className="edit-input"; mi.dataset.field="memo"; mi.dataset.id=p.id; t5.appendChild(mi);
 
-// 배송완료 칸
 var t6=mkTd(); t6.style.textAlign="center";
 var cb=document.createElement("button"); cb.className="chkbtn"+(p.delivered?" on":"");
 cb.title=p.delivered?"배송완료 취소":"배송완료 처리"; cb.textContent=p.delivered?"✅":"○"; cb.dataset.tog=p.id; t6.appendChild(cb);
 
-// 삭제 칸
 var t7=mkTd(); t7.style.textAlign="center";
 var db=document.createElement("button"); db.className="btn btn-red btn-icon"; db.title="삭제"; db.dataset.del=p.id;
 db.innerHTML='<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'; t7.appendChild(db);
@@ -494,7 +500,7 @@ function doExport() {
 var csv="월,구매자,양도인,양도금액,구매 품목,금액,비고,배송완료\n";
 qMonths().forEach(function(m){
 purchases.filter(function(p){ return p.month===m; }).forEach(function(p){
-csv+=[m+"월",p.memberName,p.link,p.amount,p.fromName||"",p.fromAmt||0,p.memo||"",p.delivered?"완료":"미완료"]
+csv+=[m+"월",p.memberName,p.fromName||"",p.fromAmt||0,p.link,p.amount,p.memo||"",p.delivered?"완료":"미완료"]
 .map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(",")+"\n";
 });
 });
