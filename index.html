@@ -136,7 +136,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <table>
 <thead><tr>
 <th style="width:100px;text-align:center">구매자</th>
-<th style="width:180px;text-align:center">양도인 / 양도금액</th>
+<th style="width:180px;text-align:center">양도인 / 양도금액(원)</th>
 <th style="text-align:center">구매 품목</th>
 <th style="width:120px;text-align:center">금액(원)</th>
 <th style="width:120px;text-align:center">비고</th>
@@ -374,7 +374,7 @@ var fromAi=document.createElement("input"); fromAi.type="text";
 fromAi.value=(p.fromAmt&&p.fromAmt>0)?p.fromAmt.toLocaleString()+"원":"";
 fromAi.placeholder="양도금액"; fromAi.className="edit-input"; fromAi.dataset.field="fromAmt"; fromAi.dataset.id=p.id; fromAi.dataset.raw=p.fromAmt||0; fromAi.style.cssText="font-size:12px;text-align:center";
 fromAi.addEventListener("focus",function(){ this.value=this.dataset.raw>0?this.dataset.raw:""; this.select(); });
-fromAi.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n?n.toLocaleString()+"원":""; });
+fromAi.addEventListener("blur",function(){ var n=parseInt(this.value)||0; this.dataset.raw=n; this.value=n?n.toLocaleString():""; });
 var yCell=document.createElement("div"); yCell.className="yangdo-cell"; yCell.appendChild(fromSel); yCell.appendChild(fromAi); t4.appendChild(yCell);
 
 // 비고 칸
