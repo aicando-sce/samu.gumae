@@ -92,7 +92,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <div class="logo">[학습개발2팀] <span>사무용품 구매관리</span></div>
 <div style="display:flex;gap:8px;align-items:center">
 <a href="https://www.naver.com" target="_blank" rel="noopener" style="text-decoration:none" class="btn btn-out">🟢 네이버 바로가기</a>
-<button class="btn btn-out" id="btnMyBalance">💰 나의 잔액 확인</button>
+<button class="btn btn-out" id="btnMyBalance">💰 나의 잔액 확인하기</button>
 <button class="btn btn-out" id="btnMemberModal">👤 팀원 관리</button>
 <button class="btn btn-out" id="btnEx">📥 CSV 내보내기</button>
 </div>
@@ -153,7 +153,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <!-- 나의 잔액 확인 모달 -->
 <div class="mbg" id="myBalanceModal" style="display:none">
 <div class="modal" style="width:600px;max-height:80vh;overflow-y:auto">
-<h3>💰 나의 잔액 확인</h3>
+<h3>💰 나의 잔액 확인하기</h3>
 <p class="modal-sub">이름을 선택하면 분기별 사용 내역과 잔액을 확인할 수 있어요.</p>
 <div style="display:flex;gap:8px;margin-bottom:16px">
 <select id="myNameSel" style="flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;outline:none;height:42px"></select>
@@ -348,7 +348,7 @@ var perPerson=document.getElementById("perPersonInfo");
 if (budget>0) {
 apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }).then(function(r){
 var cnt=(r.names||[]).length;
-if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000-3000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro22 / PW: ansrnfb123!@#"; }
+if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000-3000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro-2 / PW: ansrnfb123!@#"; }
 else { perPerson.innerHTML=""; }
 });
 } else { perPerson.innerHTML=""; }
