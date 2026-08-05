@@ -78,7 +78,14 @@ tr:last-child td { border-bottom:none; } tr:hover td { background:var(--bg); } t
 .modal label { display:block; font-size:12px; color:var(--sub); font-weight:600; margin-bottom:4px; }
 .modal select, .modal input[type=number] { width:100%; border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:14px; margin-bottom:14px; outline:none; -webkit-appearance:none; -moz-appearance:textfield; }
 .modal select:focus, .modal input:focus { border-color:var(--blue); }
-.mbtns { display:flex; gap:8px; justify-content:flex-end; margin-top:4px; }
+.mbtns { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+.admin-tabs { display:flex; gap:4px; margin-bottom:18px; background:var(--bg); border-radius:8px; padding:4px; }
+.admin-tab { flex:1; text-align:center; padding:7px 0; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; color:var(--sub); border:none; background:none; }
+.admin-tab.on { background:var(--white); color:var(--blue); box-shadow:var(--sh); }
+.ship-list { max-height:200px; overflow-y:auto; margin-bottom:12px; }
+.ship-item { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.ship-item:last-child { border-bottom:none; }
+.btn-dark { background:var(--text); color:#fff; }
 .loading-bar { position:fixed; top:0; left:0; height:3px; background:var(--blue); transition:width .3s; z-index:999; }
 @media(max-width:700px) {
 .cards{grid-template-columns:1fr 1fr} .addrow{grid-template-columns:1fr 1fr}
@@ -93,8 +100,8 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <div style="display:flex;gap:8px;align-items:center">
 <a href="https://www.naver.com" target="_blank" rel="noopener" style="text-decoration:none" class="btn btn-out">🟢 네이버 바로가기</a>
 <button class="btn btn-out" id="btnMyBalance">💰 나의 잔액 확인하기</button>
-<button class="btn btn-out" id="btnMemberModal">👤 팀원 관리</button>
 <button class="btn btn-out" id="btnEx">📥 CSV 내보내기</button>
+<button class="btn btn-out" id="btnAdmin">🔐 관리자</button>
 </div>
 </header>
 <div class="wrap">
@@ -124,7 +131,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <span class="ptitle" id="mTitle">구매 내역</span>
 <span class="msum" id="mSum"></span>
 </div>
-<div id="noMemberMsg" class="no-member" style="display:none">팀원을 추가해주세요.</div>
+<div id="noMemberMsg" class="no-member" style="display:none">팀원을 추가해 주세요(관리자 기능).</div>
 <div id="purchaseSection">
 <div class="addrow">
 <select id="addMem"></select>
@@ -164,17 +171,57 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 </div>
 </div>
 
-<!-- 팀원 관리 모달 -->
-<div class="mbg" id="memberModal" style="display:none">
-<div class="modal">
-<h3 id="modalTitle">👤 팀원 관리</h3>
-<div class="member-list" id="memberList" style="margin-bottom:14px"></div>
-<div class="member-add">
-<input type="text" id="newName" placeholder="팀원 이름">
-<button class="btn btn-blue" id="btnAddM">+ 추가</button>
+<!-- 관리자 비밀번호 모달 -->
+<div class="mbg" id="adminPwModal" style="display:none">
+  <div class="modal" style="width:320px">
+    <h3>🔐 관리자 로그인</h3>
+    <label>비밀번호(숫자 4자리)</label>
+    <input type="password" id="adminPwInput" placeholder="••••" maxlength="4" style="letter-spacing:8px;font-size:20px;text-align:center;margin-top:6px">
+    <p id="adminPwError" style="color:var(--red);font-size:12px;margin-top:6px;display:none">비밀번호가 틀렸습니다.</p>
+    <div class="mbtns">
+      <button class="btn btn-out" id="btnAdminPwCancel">취소</button>
+      <button class="btn btn-blue" id="btnAdminPwOk">확인</button>
+    </div>
+  </div>
 </div>
-<div class="mbtns"><button class="btn btn-out" id="btnCloseModal">닫기</button></div>
-</div>
+ 
+<!-- 관리자 메인 모달 -->
+<div class="mbg" id="adminModal" style="display:none">
+  <div class="modal" style="width:500px;max-height:80vh;overflow-y:auto">
+    <h3>🔐 관리자</h3>
+    <div class="admin-tabs">
+      <button class="admin-tab on" id="adminTab1" onclick="switchAdminTab(1)">👤 팀원 관리</button>
+      <button class="admin-tab" id="adminTab2" onclick="switchAdminTab(2)">🚚 배송비 관리</button>
+    </div>
+    <!-- 팀원 관리 -->
+    <div id="adminSection1">
+      <div class="member-list" id="memberList" style="margin-bottom:14px"></div>
+      <div class="member-add">
+        <input type="text" id="newName" placeholder="팀원 이름">
+        <button class="btn btn-blue" id="btnAddM">+ 추가</button>
+      </div>
+    </div>
+    <!-- 배송비 관리 -->
+    <div id="adminSection2" style="display:none">
+      <p style="font-size:12px;color:var(--sub);margin-bottom:12px">배송비는 분기 예산에서 공동 차감되며 팀원 개인 예산에는 영향 없음.</p>
+      <div class="ship-list" id="shipList"></div>
+      <div style="margin-top:8px">
+        <div style="display:flex;gap:8px;margin-bottom:4px">
+          <div style="flex:1;font-size:12px;color:var(--sub);font-weight:600">월</div>
+          <div style="flex:2;font-size:12px;color:var(--sub);font-weight:600">금액(원)</div>
+          <div style="width:67px"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select id="shipMonth" style="flex:1;height:38px"></select>
+          <input type="text" id="shipAmt" placeholder="금액" inputmode="numeric" style="flex:2;height:38px">
+          <button class="btn btn-blue" id="btnAddShip" style="height:38px;white-space:nowrap">+ 추가</button>
+        </div>
+      </div>
+    </div>
+    <div class="mbtns">
+      <button class="btn btn-out" id="btnAdminClose">닫기</button>
+    </div>
+  </div>
 </div>
 <!-- 양도 받기 모달 -->
 <div class="mbg" id="yangdoModal" style="display:none">
@@ -192,12 +239,16 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 </div>
 </div>
 <script>
-var API_URL = "https://script.google.com/macros/s/AKfycbzctSE7sObmKS4ly5wY648ZQsgSrd9Lqyd7Xr5aHJB3GCkGFz9sKFMfhde9LE2aglovUg/exec";
+var API_URL = "https://script.google.com/macros/s/AKfycbxDhMf12Nar4U9_7ji6nzhN1CfRh1y-mMIkaSdTtHoJ6eLkFAM6k7D13tLQqOpwrWmdfA/exec";
+var ADMIN_PW = "1234";
+
 var curMonth = 1;
 var purchases = [];
 var members = [];
 var budget = 0;
+var shipping = [];
 var firstMonthMemberCount = 0;
+
 var pendingYangdoFrom = "";
 var pendingYangdoAmt = 0;
 
@@ -248,17 +299,25 @@ if (e.key==="Enter") { var n=parseInt(this.value.replace(/[^0-9]/g,""))||0; this
 });
 budIn.addEventListener("blur", function() { var n=parseInt(this.value.replace(/[^0-9]/g,""))||0; this.value=n?n.toLocaleString()+"원":""; doSaveBudget(n); });
 
+
+// 관리자
+document.getElementById("btnAdmin").addEventListener("click", openAdminPwModal);
+document.getElementById("btnAdminPwOk").addEventListener("click", checkAdminPw);
+document.getElementById("btnAdminPwCancel").addEventListener("click", closeAdminPwModal);
+document.getElementById("adminPwInput").addEventListener("keydown", function(e){ if(e.key==="Enter") checkAdminPw(); });
+document.getElementById("adminPwModal").addEventListener("click", function(e){ if(e.target===this) closeAdminPwModal(); });
+document.getElementById("btnAdminClose").addEventListener("click", function(){ document.getElementById("adminModal").style.display="none"; });
+document.getElementById("adminModal").addEventListener("click", function(e){ if(e.target===this) this.style.display="none"; });
 document.getElementById("btnMyBalance").addEventListener("click", openMyBalanceModal);
 document.getElementById("btnMyBalanceClose").addEventListener("click", function(){ document.getElementById("myBalanceModal").style.display="none"; });
 document.getElementById("btnMyBalanceSearch").addEventListener("click", renderMyBalance);
 document.getElementById("myBalanceModal").addEventListener("click", function(e){ if(e.target===this) this.style.display="none"; });
 document.getElementById("btnAddM").addEventListener("click", addMember);
 document.getElementById("newName").addEventListener("keydown", function(e){ if(e.key==="Enter") addMember(); });
+document.getElementById("btnAddShip").addEventListener("click", addShipping);
+document.getElementById("shipAmt").addEventListener("keydown", function(e){ if(e.key==="Enter") addShipping(); });
 document.getElementById("btnAdd").addEventListener("click", addPurchase);
 document.getElementById("btnEx").addEventListener("click", doExport);
-document.getElementById("btnMemberModal").addEventListener("click", openMemberModal);
-document.getElementById("btnCloseModal").addEventListener("click", closeMemberModal);
-document.getElementById("memberModal").addEventListener("click", function(e){ if(e.target===this) closeMemberModal(); });
 document.getElementById("btnYangdo").addEventListener("click", openYangdoModal);
 document.getElementById("btnYangdoClose").addEventListener("click", closeYangdoModal);
 document.getElementById("btnYangdoOk").addEventListener("click", confirmYangdo);
@@ -287,12 +346,14 @@ Promise.all([
 apiGet({ action:"getPurchases", year:yr(), quarter:q() }),
 apiGet({ action:"getMembers", year:yr(), month:curMonth }),
 apiGet({ action:"getBudget", year:yr(), quarter:q() }),
-apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] })
+apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }),
+apiGet({ action:"getShipping", year:yr(), quarter:q() })
 ]).then(function(results) {
 purchases = results[0].purchases || [];
 members   = results[1].names || [];
 budget    = results[2].amount || 0;
 firstMonthMemberCount = (results[3].names || []).length;
+shipping  = results[4].items || [];
 document.getElementById("budIn").value = budget ? budget.toLocaleString()+"원" : "";
 renderTabs(); renderDropdown(); renderTable(); renderSummary();
 endLoad();
@@ -303,6 +364,40 @@ endLoad();
 });
 }
 
+// ━━━━ 관리자 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openAdminPwModal() {
+  document.getElementById("adminPwInput").value = "";
+  document.getElementById("adminPwError").style.display = "none";
+  document.getElementById("adminPwModal").style.display = "flex";
+  setTimeout(function(){ document.getElementById("adminPwInput").focus(); }, 100);
+}
+function closeAdminPwModal() {
+  document.getElementById("adminPwModal").style.display = "none";
+  document.getElementById("adminPwError").style.display = "none";
+  document.getElementById("adminPwInput").value = "";
+}
+function checkAdminPw() {
+  var pw = document.getElementById("adminPwInput").value;
+  if (pw === ADMIN_PW) {
+    closeAdminPwModal();
+    switchAdminTab(1);
+    document.getElementById("adminModal").style.display = "flex";
+  } else {
+    document.getElementById("adminPwError").style.display = "block";
+    document.getElementById("adminPwInput").value = "";
+    document.getElementById("adminPwInput").focus();
+  }
+}
+function switchAdminTab(n) {
+  document.getElementById("adminSection1").style.display = n===1?"block":"none";
+  document.getElementById("adminSection2").style.display = n===2?"block":"none";
+  document.getElementById("adminTab1").className = "admin-tab"+(n===1?" on":"");
+  document.getElementById("adminTab2").className = "admin-tab"+(n===2?" on":"");
+  if (n===1) renderMembers();
+  if (n===2) { renderShipMonthSel(); renderShipping(); }
+}
+
+// ━━━━ RENDER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function renderTabs() {
 var row=document.getElementById("tabRow"); row.innerHTML="";
 qMonths().forEach(function(m) {
@@ -311,13 +406,11 @@ b.className="tab"+(m===curMonth?" on":""); b.textContent=m+"월";
 b.addEventListener("click",(function(mm){ return function(){
 curMonth=mm; renderTabs(); renderSummary(); startLoad();
 apiGet({ action:"getMembers", year:yr(), month:curMonth }).then(function(r){
-members=r.names||[]; renderDropdown(); renderTable();
-if (isModalOpen()){ document.getElementById("modalTitle").textContent=curMonth+"월 팀원 관리"; renderMembers(); }
-endLoad();
-});
-};})(m));
-row.appendChild(b);
-});
+members=r.names||[]; renderDropdown(); renderTable(); endLoad();
+      });
+    };})(m));
+    row.appendChild(b);
+  });
 }
 
 function renderDropdown() {
@@ -333,9 +426,11 @@ if (members.indexOf(prev)>=0) sel.value=prev;
 function renderSummary() {
 var ps=purchases;
 var total=ps.reduce(function(s,p){ return s+p.amount; },0);
-var remain=budget-total;
+var shipTotal=shipping.reduce(function(s,x){ return s+x.amt; },0);
+var mShipTotal=shipping.filter(function(x){ return parseInt(x.desc)===curMonth; }).reduce(function(s,x){ return s+x.amt; },0);
+var remain=budget-total-shipTotal;
 document.getElementById("cBud").textContent=budget?budget.toLocaleString()+"원":"미설정";
-document.getElementById("cUsd").textContent=total.toLocaleString()+"원";
+document.getElementById("cUsd").textContent=(total+shipTotal).toLocaleString()+"원";
 var re=document.getElementById("cRem"); re.textContent=remain.toLocaleString()+"원"; re.className="val "+(remain<0?"red":"green");
 document.getElementById("cCnt").textContent=ps.length+"건";
 document.getElementById("cDlv").textContent=ps.filter(function(p){ return p.delivered; }).length+"건";
@@ -343,7 +438,8 @@ var mps=ps.filter(function(p){ return p.month===curMonth; });
 var mTotal=mps.reduce(function(s,p){ return s+p.amount; },0);
 var done=mps.filter(function(p){ return p.delivered; }).length;
 document.getElementById("mTitle").textContent=curMonth+"월 구매 내역";
-document.getElementById("mSum").innerHTML="<span>월 사용 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span><span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
+document.getElementById("mSum").innerHTML="<span>월 사용 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span><span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>"+(mShipTotal>0?"<span>월 배송비 <strong>"+mShipTotal.toLocaleString()+"원</strong></span>":"");
+// 인당 예산
 var perPerson=document.getElementById("perPersonInfo");
 if (budget>0) {
 apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }).then(function(r){
@@ -435,9 +531,36 @@ chip.appendChild(btn); list.appendChild(chip);
 });
 }
 
-function isModalOpen() { return document.getElementById("memberModal").style.display==="flex"; }
-function openMemberModal() { document.getElementById("modalTitle").textContent=curMonth+"월 팀원 관리"; renderMembers(); document.getElementById("memberModal").style.display="flex"; document.getElementById("newName").focus(); }
-function closeMemberModal() { document.getElementById("memberModal").style.display="none"; }
+function renderShipMonthSel() {
+  var sel = document.getElementById("shipMonth");
+  if (!sel) return;
+  sel.innerHTML = "";
+  qMonths().forEach(function(m) {
+    var o = document.createElement("option"); o.value = m; o.textContent = m+"월";
+    if (m === curMonth) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+ 
+function renderShipping() {
+  var list=document.getElementById("shipList"); list.innerHTML="";
+  if (!shipping.length) {
+    list.innerHTML='<div style="color:var(--sub);font-size:13px;font-style:italic;padding:8px 0">배송비 내역이 없습니다.</div>'; return;
+  }
+  shipping.forEach(function(s,i){
+    var item=document.createElement("div"); item.className="ship-item";
+    item.innerHTML='<span><strong>'+s.desc+'월</strong> 배송비</span>'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+      '<span style="font-weight:600;color:var(--red)">-'+s.amt.toLocaleString()+'원</span>'+
+      '<button data-shiprmv="'+i+'" style="background:none;border:none;cursor:pointer;color:var(--red)">'+
+      '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 1L10 10M10 1L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'+
+      '</button></div>';
+    list.appendChild(item);
+  });
+  var total=shipping.reduce(function(s,x){ return s+x.amt; },0);
+  var tot=document.createElement("div"); tot.style.cssText="text-align:right;font-size:12px;color:var(--sub);padding-top:8px;border-top:1px solid var(--border);margin-top:4px";
+  tot.textContent="합계: "+total.toLocaleString()+"원"; list.appendChild(tot);
+}
 
 function openYangdoModal() {
 var fromSel=document.getElementById("yangdoFrom");
@@ -460,18 +583,36 @@ closeYangdoModal();
 }
 
 function addMember() {
-var name=document.getElementById("newName").value.trim(); if (!name) return;
-if (members.indexOf(name)>=0) { alert('"'+name+'"은(는) 이미 이번 달 팀원입니다.'); return; }
-members.push(name); startLoad();
-apiPost({ action:"saveMembers", year:yr(), month:curMonth, names:members }).then(function(){
-document.getElementById("newName").value=""; renderMembers(); renderDropdown(); endLoad();
-});
+  var name=document.getElementById("newName").value.trim(); if (!name) return;
+  if (members.indexOf(name)>=0){ alert('"'+name+'"은(는) 이미 추가된 팀원입니다.'); return; }
+  members.push(name); startLoad();
+  apiPost({ action:"saveMembers", year:yr(), month:curMonth, names:members }).then(function(){
+    document.getElementById("newName").value=""; renderMembers(); renderDropdown(); endLoad();
+  });
 }
 function removeMember(name) {
-members=members.filter(function(n){ return n!==name; }); startLoad();
-apiPost({ action:"saveMembers", year:yr(), month:curMonth, names:members }).then(function(){
-renderMembers(); renderDropdown(); renderTable(); endLoad();
-});
+  members=members.filter(function(n){ return n!==name; }); startLoad();
+  apiPost({ action:"saveMembers", year:yr(), month:curMonth, names:members }).then(function(){
+    renderMembers(); renderDropdown(); renderTable(); endLoad();
+  });
+}
+
+function addShipping() {
+  var month = parseInt(document.getElementById("shipMonth").value);
+  var amt = parseInt(document.getElementById("shipAmt").value)||0;
+  if (!month||!amt){ alert("월과 금액을 입력해주세요."); return; }
+  startLoad();
+  apiPost({ action:"addShipping", year:yr(), quarter:q(), desc:String(month), amount:amt }).then(function(){
+    shipping.push({ desc:String(month), amt:amt });
+    document.getElementById("shipAmt").value="";
+    renderShipping(); renderSummary(); endLoad();
+  });
+}
+function removeShipping(idx) {
+  startLoad();
+  apiPost({ action:"deleteShipping", year:yr(), quarter:q(), idx:idx }).then(function(){
+    shipping.splice(idx,1); renderShipping(); renderSummary(); endLoad();
+  });
 }
 
 function addPurchase() {
@@ -608,16 +749,20 @@ function renderMyBalance() {
 
 
 function doExport() {
-var csv="월,구매자,양도인,양도금액,구매 품목,금액,비고,배송완료\n";
-qMonths().forEach(function(m){
-purchases.filter(function(p){ return p.month===m; }).forEach(function(p){
-csv+=[m+"월",p.memberName,p.fromName||"",p.fromAmt||0,p.link,p.amount,p.memo||"",p.delivered?"완료":"미완료"]
-.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(",")+"\n";
-});
-});
-var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
-var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-a.download="사무용품 구매 내역_"+yr()+"년 "+q()+"분기.csv"; a.click();
+  var csv="월,구매자,구매 사이트(링크),금액,메모,배송완료\n";
+  qMonths().forEach(function(m){
+    purchases.filter(function(p){ return p.month===m; }).forEach(function(p){
+      csv+=[m+"월",p.memberName,p.link,p.amount,p.memo||"",p.delivered?"완료":"미완료"]
+        .map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(",")+"\n";
+    });
+  });
+  if (shipping.length){
+    csv+="\n배송비 내역\n월,금액\n";
+    shipping.forEach(function(s){ csv+=s.desc+'월,'+s.amt+"\n"; });
+  }
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="사무용품 구매 내역_"+yr()+"년 "+q()+"분기.csv"; a.click();
 }
 
 init();
