@@ -441,8 +441,11 @@ document.getElementById("cDlv").textContent=ps.filter(function(p){ return p.deli
 var mps=ps.filter(function(p){ return p.month===curMonth; });
 var mTotal=mps.reduce(function(s,p){ return s+p.amount; },0);
 var done=mps.filter(function(p){ return p.delivered; }).length;
-document.getElementById("mTitle").textContent=curMonth+"월 구매 내역";
-document.getElementById("mSum").innerHTML="<span>월 사용 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span><span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>"+(mShipTotal>0?"<span>월 배송비 <strong>"+mShipTotal.toLocaleString()+"원</strong></span>":"");
+document.getElementById("mTitle").textContent=curMonth+"월 구매 내역("+(mTotal+mShipTotal).toLocaleString()+"원)";
+document.getElementById("mSum").innerHTML=
+  "<span>상품 금액 <strong>"+mTotal.toLocaleString()+"원</strong></span>"+
+  (mShipTotal>0?"<span>배송비 <strong>-"+mShipTotal.toLocaleString()+"원</strong></span>":"")+
+  "<span>배송완료 <strong>"+done+"/"+mps.length+"건</strong></span>";
 // 인당 예산
 var perPerson=document.getElementById("perPersonInfo");
 if (budget>0) {
