@@ -139,7 +139,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <button class="btn-yangdo" id="btnYangdo">💸 양도 받기</button>
 <input type="text" id="addLnk" placeholder="구매 품목">
 <input type="number" id="addAmt" placeholder="금액(배송비 제외)">
-<input type="text" id="addMmo" placeholder="비고">
+<input type="text" id="addMmo" placeholder="배송비">
 <button class="btn btn-blue" id="btnAdd">+ 추가</button>
 </div>
 <table>
@@ -148,7 +148,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
 <th style="width:180px;text-align:center">양도인 / 양도금액(원)</th>
 <th style="text-align:center">구매 품목</th>
 <th style="width:120px;text-align:center">금액(원)</th>
-<th style="width:120px;text-align:center">비고</th>
+<th style="width:120px;text-align:center">배송비</th>
 <th style="width:70px;text-align:center;white-space:nowrap">배송완료</th>
 <th style="width:50px;text-align:center">삭제</th>
 </tr></thead>
@@ -204,7 +204,7 @@ header{padding:0 16px} .wrap{padding:16px 12px}
     </div>
     <!-- 배송비 관리 -->
     <div id="adminSection2" style="display:none">
-      <p style="font-size:12px;color:var(--sub);margin-bottom:12px">배송비는 분기 예산에서 공동 차감되며 팀원 개인 예산에는 영향 없음.</p>
+      <p style="font-size:12px;color:var(--sub);margin-bottom:12px">배송비는 관리자 직접 입력.</p>
       <div class="ship-list" id="shipList"></div>
       <div style="margin-top:8px">
         <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:8px;margin-bottom:4px;align-items:end">
@@ -451,7 +451,7 @@ var perPerson=document.getElementById("perPersonInfo");
 if (budget>0) {
 apiGet({ action:"getMembers", year:yr(), month:qMonths()[0] }).then(function(r){
 var cnt=(r.names||[]).length;
-if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000-3000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro-2 / PW: ansrnfb123!@#"; }
+if (cnt>0) { var perAmt=Math.floor(budget/cnt/1000)*1000; perPerson.innerHTML="※ 분기 내 인당 "+perAmt.toLocaleString()+"원 ※ ID: gkrro-2 / PW: ansrnfb123!@#"; }
 else { perPerson.innerHTML=""; }
 });
 } else { perPerson.innerHTML=""; }
