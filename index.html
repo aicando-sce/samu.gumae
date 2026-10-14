@@ -703,10 +703,12 @@ function renderMyBalance() {
 
     mps.forEach(function(p) {
       hasAny = true;
-      totalPurchase += p.amount;
+      totalPurchase += p.amount + parseMemo(p.memo);
       html += '<tr><td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;color:var(--sub)">' + m + '월</td>';
       html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border)">' + (p.link||'(품목 없음)') + '</td>';
-      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap">-' + p.amount.toLocaleString() + '원</td></tr>';
+      var memoAmt = parseMemo(p.memo);
+      var totalAmt = p.amount + memoAmt;
+      html += '<td style="padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap">-' + totalAmt.toLocaleString() + '원</td></tr>';
     });
 
     mReceived.forEach(function(p) {
