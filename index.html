@@ -733,7 +733,7 @@ function renderMyBalance() {
   html += '</table>';
 
   // 파란 정산 칸
-  var perAmt = firstMonthMemberCount > 0 ? Math.floor(budget / firstMonthMemberCount / 1000) * 1000 - 3000 : 0;
+  var perAmt = firstMonthMemberCount > 0 ? Math.floor(budget / firstMonthMemberCount / 1000) * 1000 : 0;
   var remain = perAmt - totalPurchase + totalReceived - totalGiven;
 
   html += '<div style="background:var(--blue);color:#fff;border-radius:10px;padding:16px">';
